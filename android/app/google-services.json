@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "941887680259",
+    "project_id": "turmalina-auth",
+    "storage_bucket": "turmalina-auth.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:941887680259:android:66c974bfa6c66987690336",
+        "android_client_info": {
+          "package_name": "com.example.turmalina"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDDVbql3SGZOI3cf6Zf6nBxyK7b0-UKjKk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
