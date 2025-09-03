@@ -4,6 +4,7 @@ import 'package:altgest/caixa/caixa.dart';
 import 'package:altgest/procedimentos/taps.dart';
 import 'package:altgest/estoque/estoque.dart';
 import 'package:altgest/notas/notas.dart';
+import 'package:altgest/rotina_diarias.dart/rotina_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 
 class MainScreen extends StatefulWidget {
@@ -24,6 +25,7 @@ class _MainScreenState extends State<MainScreen> {
     ProcedimentosTabs(),
     EstoquePage(),
     NotasPage(),
+    RotinasPage(), // Adiciona a página de Rotinas
     Center(child: Text('Configurações')),
   ];
 
@@ -133,6 +135,15 @@ class _MainScreenState extends State<MainScreen> {
           ListTile(
             leading: Icon(Icons.settings),
             title: Text('Configurações'),
+            selected: _currentIndex == 7,
+            onTap: () {
+              _onItemSelected(7);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.repeat),
+            title: Text('Rotinas'),
             selected: _currentIndex == 6,
             onTap: () {
               _onItemSelected(6);
@@ -165,6 +176,8 @@ class _MainScreenState extends State<MainScreen> {
       case 5:
         return Text('AltGest - Notas');
       case 6:
+        return Text('AltGest - Rotinas');
+      case 7:
         return Text('AltGest - Configurações');
       default:
         return Text('AltGest');
