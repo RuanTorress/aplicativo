@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:intl/intl.dart';
-import 'dart:math' as math;
 import 'package:flutter/services.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'novo_item.dart';
 
 // Modelo de Item de Estoque
 @HiveType(typeId: 0)
@@ -65,7 +65,6 @@ class _EstoquePageState extends State<EstoquePage>
   late AnimationController _animationController;
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
-  String _filterBy = 'Todos';
 
   @override
   void initState() {
@@ -127,247 +126,21 @@ class _EstoquePageState extends State<EstoquePage>
     showDialog(
       context: context,
       builder: (context) {
-        return AlertDialog(
-          insetPadding: EdgeInsets.symmetric(
-            horizontal: 16,
-            vertical: 24,
-          ), // Mobile-friendly margins
-          backgroundColor: Colors.white,
-          elevation: 10,
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(20),
-          ),
-          title: Row(
-            children: [
-              Icon(
-                item == null ? Icons.add_box : Icons.edit,
-                color: Colors.blue,
-              ),
-              SizedBox(width: 10),
-              Text(
-                item == null ? 'Adicionar Item' : 'Editar Item',
-                style: TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
-          ),
-          content: SingleChildScrollView(
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  TextFormField(
-                    controller: nomeController,
-                    decoration: InputDecoration(
-                      labelText: 'Nome do Produto',
-                      prefixIcon: Icon(Icons.inventory_2),
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2),
-                      ),
-                      enabledBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(
-                          color: Colors.grey.shade300,
-                          width: 2,
-                        ),
-                      ),
-                      focusedBorder: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(12),
-                        borderSide: BorderSide(color: Colors.blue, width: 2),
-                      ),
-                      filled: true,
-                      fillColor: Colors.grey.shade50,
-                    ),
-                    validator: (value) => value == null || value.isEmpty
-                        ? 'Por favor, insira o nome do produto'
-                        : null,
-                  ),
-                  SizedBox(height: 16),
-                  // Stack quantity and value fields for smaller screens
-                  MediaQuery.of(context).size.width < 400
-                      ? Column(
-                          children: [
-                            _buildFormField(
-                              controller: quantidadeController,
-                              label: 'Quantidade',
-                              icon: Icons.add_shopping_cart,
-                              keyboardType: TextInputType.number,
-                              inputFormatters: [
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Insira a quantidade';
-                                }
-                                if (int.tryParse(value) == null) {
-                                  return 'Apenas números';
-                                }
-                                return null;
-                              },
-                            ),
-                            SizedBox(height: 12),
-                            _buildFormField(
-                              controller: valorController,
-                              label: 'Valor R\$',
-                              icon: Icons.attach_money,
-                              keyboardType: TextInputType.numberWithOptions(
-                                decimal: true,
-                              ),
-                              inputFormatters: [
-                                FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d+\.?\d{0,2}'),
-                                ),
-                              ],
-                              validator: (value) {
-                                if (value == null || value.isEmpty) {
-                                  return 'Insira o valor';
-                                }
-                                if (double.tryParse(value) == null) {
-                                  return 'Valor inválido';
-                                }
-                                return null;
-                              },
-                            ),
-                          ],
-                        )
-                      : Row(
-                          children: [
-                            Expanded(
-                              child: _buildFormField(
-                                controller: quantidadeController,
-                                label: 'Quantidade',
-                                icon: Icons.add_shopping_cart,
-                                keyboardType: TextInputType.number,
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.digitsOnly,
-                                ],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Insira a quantidade';
-                                  }
-                                  if (int.tryParse(value) == null) {
-                                    return 'Apenas números';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                            SizedBox(width: 8),
-                            Expanded(
-                              child: _buildFormField(
-                                controller: valorController,
-                                label: 'Valor R\$',
-                                icon: Icons.attach_money,
-                                keyboardType: TextInputType.numberWithOptions(
-                                  decimal: true,
-                                ),
-                                inputFormatters: [
-                                  FilteringTextInputFormatter.allow(
-                                    RegExp(r'^\d+\.?\d{0,2}'),
-                                  ),
-                                ],
-                                validator: (value) {
-                                  if (value == null || value.isEmpty) {
-                                    return 'Insira o valor';
-                                  }
-                                  if (double.tryParse(value) == null) {
-                                    return 'Valor inválido';
-                                  }
-                                  return null;
-                                },
-                              ),
-                            ),
-                          ],
-                        ),
-                  SizedBox(height: 20),
-                  Container(
-                    padding: EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(12),
-                      border: Border.all(color: Colors.blue.shade200),
-                    ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Data do Item:',
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue.shade700,
-                          ),
-                        ),
-                        SizedBox(height: 5),
-                        Row(
-                          children: [
-                            Icon(Icons.calendar_today, color: Colors.blue),
-                            SizedBox(width: 8),
-                            Text(
-                              DateFormat('dd/MM/yyyy').format(data),
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            Spacer(),
-                            ElevatedButton.icon(
-                              onPressed: () async {
-                                DateTime? novaData = await showDatePicker(
-                                  context: context,
-                                  initialDate: data,
-                                  firstDate: DateTime(2000),
-                                  lastDate: DateTime.now(),
-                                  builder: (context, child) {
-                                    return Theme(
-                                      data: ThemeData.light().copyWith(
-                                        colorScheme: ColorScheme.light(
-                                          primary: Colors.blue,
-                                          onPrimary: Colors.white,
-                                          surface: Colors.white,
-                                        ),
-                                      ),
-                                      child: child!,
-                                    );
-                                  },
-                                );
-                                if (novaData != null) {
-                                  setState(() {
-                                    data = novaData;
-                                  });
-                                }
-                              },
-                              icon: Icon(Icons.edit_calendar),
-                              label: Text('Alterar'),
-                              style: ElevatedButton.styleFrom(
-                                backgroundColor: Colors.blue,
-                                foregroundColor: Colors.white,
-                                elevation: 2,
-                                shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          actions: [
-            TextButton.icon(
-              icon: Icon(Icons.cancel, color: Colors.grey),
-              label: Text('Cancelar'),
-              onPressed: () => Navigator.pop(context),
-              style: TextButton.styleFrom(
-                foregroundColor: Colors.grey.shade700,
-              ),
-            ),
-            ElevatedButton.icon(
-              icon: Icon(Icons.save),
-              label: Text('Salvar'),
-              onPressed: () {
+        return StatefulBuilder(
+          builder: (context, setStateDialog) {
+            return NovoItemDialog(
+              nomeController: nomeController,
+              quantidadeController: quantidadeController,
+              valorController: valorController,
+              data: data,
+              onDataChanged: (novaData) {
+                setStateDialog(() {
+                  data = novaData;
+                });
+              },
+              formKey: _formKey,
+              isEdit: item != null,
+              onSalvar: () {
                 if (_formKey.currentState!.validate()) {
                   final novoItem = ItemEstoque(
                     nome: nomeController.text,
@@ -376,46 +149,29 @@ class _EstoquePageState extends State<EstoquePage>
                     dataAdicao: data,
                   );
 
-                  if (item == null) {
-                    _estoqueBox.add(novoItem);
+                  if (item != null && index != null) {
+                    _estoqueBox.putAt(index, novoItem);
                   } else {
-                    _estoqueBox.putAt(index!, novoItem);
+                    _estoqueBox.add(novoItem);
                   }
 
                   Navigator.pop(context);
 
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
-                      content: Row(
-                        children: [
-                          Icon(Icons.check_circle, color: Colors.white),
-                          SizedBox(width: 10),
-                          Text(
-                            item == null
-                                ? 'Item adicionado com sucesso!'
-                                : 'Item atualizado com sucesso!',
-                          ),
-                        ],
+                      content: Text(
+                        item != null
+                            ? 'Item editado com sucesso!'
+                            : 'Item adicionado com sucesso!',
                       ),
-                      backgroundColor: Colors.green.shade600,
-                      behavior: SnackBarBehavior.floating,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(10),
-                      ),
+                      backgroundColor: Colors.green,
                     ),
                   );
                 }
               },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.blue,
-                foregroundColor: Colors.white,
-                elevation: 3,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-            ),
-          ],
+              onCancelar: () => Navigator.pop(context),
+            );
+          },
         );
       },
     );
@@ -456,18 +212,8 @@ class _EstoquePageState extends State<EstoquePage>
 
                 ScaffoldMessenger.of(context).showSnackBar(
                   SnackBar(
-                    content: Row(
-                      children: [
-                        Icon(Icons.check_circle, color: Colors.white),
-                        SizedBox(width: 10),
-                        Text('Item excluído com sucesso!'),
-                      ],
-                    ),
-                    backgroundColor: Colors.red.shade600,
-                    behavior: SnackBarBehavior.floating,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
+                    content: Text('Item excluído com sucesso!'),
+                    backgroundColor: Colors.red,
                   ),
                 );
               },
@@ -546,14 +292,10 @@ class _EstoquePageState extends State<EstoquePage>
         child: Column(
           children: [
             Container(
-              padding: EdgeInsets.symmetric(
-                horizontal: 12,
-                vertical: 8,
-              ), // Reduced padding
+              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               color: Colors.white,
               child: Column(
                 children: [
-                  // Search bar
                   TextField(
                     controller: _searchController,
                     onChanged: (value) {
@@ -625,6 +367,7 @@ class _EstoquePageState extends State<EstoquePage>
                             onPressed: () => _adicionarOuEditarItem(),
                             style: ElevatedButton.styleFrom(
                               backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
                               padding: EdgeInsets.symmetric(
                                 horizontal: 24,
                                 vertical: 12,
@@ -796,7 +539,6 @@ class _EstoquePageState extends State<EstoquePage>
                                               ),
                                       ),
                                       SizedBox(height: 12),
-                                      // Use stacked buttons on very small screens
                                       isSmallScreen
                                           ? Column(
                                               children: [
@@ -911,7 +653,6 @@ class _EstoquePageState extends State<EstoquePage>
                 },
               ),
             ),
-            // Simplify the total display for mobile
             Container(
               padding: EdgeInsets.symmetric(horizontal: 16, vertical: 14),
               decoration: BoxDecoration(
@@ -945,7 +686,7 @@ class _EstoquePageState extends State<EstoquePage>
                                   Text(
                                     'R\$ ${_calcularTotal().toStringAsFixed(2)}',
                                     style: TextStyle(
-                                      fontSize: 20, // Smaller text for mobile
+                                      fontSize: 20,
                                       fontWeight: FontWeight.bold,
                                       color: Colors.blue.shade800,
                                     ),
@@ -1049,38 +790,6 @@ class _EstoquePageState extends State<EstoquePage>
           style: TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
         ),
       ],
-    );
-  }
-
-  // New helper method for form fields
-  Widget _buildFormField({
-    required TextEditingController controller,
-    required String label,
-    required IconData icon,
-    required TextInputType keyboardType,
-    required List<TextInputFormatter> inputFormatters,
-    required String? Function(String?) validator,
-  }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        prefixIcon: Icon(icon),
-        border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.grey.shade300, width: 2),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.blue, width: 2),
-        ),
-        filled: true,
-        fillColor: Colors.grey.shade50,
-      ),
-      keyboardType: keyboardType,
-      inputFormatters: inputFormatters,
-      validator: validator,
     );
   }
 }
