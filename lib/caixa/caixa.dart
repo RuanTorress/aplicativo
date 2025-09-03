@@ -184,23 +184,7 @@ class _CaixaPageState extends State<CaixaPage>
 
     return Scaffold(
       backgroundColor: backgroundColor,
-      appBar: AppBar(
-        title: Text(
-          'Gestão Financeira',
-          style: TextStyle(fontWeight: FontWeight.w600),
-        ),
-        centerTitle: true,
-        elevation: 0,
-        backgroundColor: backgroundColor,
-        bottom: TabBar(
-          controller: _tabController,
-          tabs: _periodos.map((periodo) => Tab(text: periodo)).toList(),
-          labelStyle: TextStyle(fontWeight: FontWeight.bold),
-          indicatorColor: primaryColor,
-          indicatorWeight: 3,
-          labelColor: primaryColor,
-        ),
-      ),
+
       body: RefreshIndicator(
         onRefresh: () async {
           _refreshLancamentos();

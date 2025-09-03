@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
@@ -27,20 +28,66 @@ class _LancamentoPageState extends State<LancamentoPage> {
   bool _isEntrada = true;
   DateTime _selectedDate = DateTime.now();
 
+  // Helpers de formatação
+  final NumberFormat _brlFormatter = NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: '',
+    decimalDigits: 2,
+  );
+  bool _isFormattingValor = false;
+
   @override
   void initState() {
     super.initState();
     _dataController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
+    // Formatar valor enquanto digita em padrão BR (ex: 1.234,56)
+    _valorController.addListener(_onValorChanged);
   }
 
   @override
   void dispose() {
     _descricaoController.dispose();
+    _valorController.removeListener(_onValorChanged);
     _valorController.dispose();
     _usuarioController.dispose();
     _observacaoController.dispose();
     _dataController.dispose();
     super.dispose();
+  }
+
+  void _onValorChanged() {
+    if (_isFormattingValor) return;
+    final raw = _valorController.text;
+    if (raw.isEmpty) return;
+
+    // Mantém apenas dígitos
+    final digits = raw.replaceAll(RegExp(r'[^0-9]'), '');
+    if (digits.isEmpty) {
+      return;
+    }
+
+    // Converte para centavos e formata
+    _isFormattingValor = true;
+    try {
+      final valueInCents = int.parse(digits);
+      final value = valueInCents / 100.0;
+      final formatted = _brlFormatter.format(value).trim();
+      final selectionIndexFromEnd =
+          _valorController.text.length - _valorController.selection.end;
+      _valorController.value = TextEditingValue(
+        text: formatted,
+        selection: TextSelection.collapsed(
+          offset: (formatted.length - selectionIndexFromEnd).clamp(
+            0,
+            formatted.length,
+          ),
+        ),
+      );
+    } catch (_) {
+      // Se algo der errado, não quebra a digitação
+    } finally {
+      _isFormattingValor = false;
+    }
   }
 
   Future<void> _selectDate(BuildContext context) async {
@@ -76,7 +123,12 @@ class _LancamentoPageState extends State<LancamentoPage> {
     if (!_formKey.currentState!.validate()) return;
 
     try {
-      double valor = double.parse(_valorController.text.replaceAll(',', '.'));
+      // Converte "1.234,56" -> "1234.56"
+      final sanitized = _valorController.text
+          .replaceAll('.', '')
+          .replaceAll(',', '.')
+          .trim();
+      double valor = double.parse(sanitized);
 
       // Ajusta o valor para negativo se for saída
       if (!_isEntrada) {
@@ -116,279 +168,372 @@ class _LancamentoPageState extends State<LancamentoPage> {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Novo Lançamento'),
+        centerTitle: true,
         elevation: 0,
-        backgroundColor: isDarkMode
-            ? Colors.grey[900]
-            : theme.colorScheme.primaryContainer,
-        foregroundColor: theme.colorScheme.onPrimaryContainer,
+        flexibleSpace: Container(
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              colors: isDarkMode
+                  ? [Colors.grey.shade900, Colors.grey.shade800]
+                  : [
+                      theme.colorScheme.primary,
+                      theme.colorScheme.primaryContainer,
+                    ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        foregroundColor: isDarkMode
+            ? Colors.white
+            : theme.colorScheme.onPrimary,
       ),
-      body: SingleChildScrollView(
-        padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _formKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Tipo de Lançamento (Entrada/Saída)
-              Card(
-                elevation: 4,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+          child: Form(
+            key: _formKey,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                // Seção: Tipo de Lançamento (Entrada/Saída)
+                _buildSection(
+                  context,
+                  title: 'Tipo de Lançamento',
                   child: Row(
                     children: [
-                      Text(
-                        'Tipo de Lançamento:',
-                        style: theme.textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.bold,
+                      Expanded(
+                        child: _buildTypePill(
+                          context,
+                          label: 'Entrada',
+                          selected: _isEntrada,
+                          selectedColor: Colors.green,
+                          onTap: () => setState(() => _isEntrada = true),
                         ),
-                      ),
-                      const SizedBox(width: 20),
-                      ChoiceChip(
-                        label: const Text('Entrada'),
-                        selected: _isEntrada,
-                        selectedColor: Colors.green[100],
-                        backgroundColor: isDarkMode
-                            ? Colors.grey[700]
-                            : Colors.grey[200],
-                        labelStyle: TextStyle(
-                          color: _isEntrada
-                              ? Colors.green[800]
-                              : theme.colorScheme.onSurface,
-                        ),
-                        onSelected: (selected) {
-                          setState(() {
-                            _isEntrada = true;
-                          });
-                        },
                       ),
                       const SizedBox(width: 12),
-                      ChoiceChip(
-                        label: const Text('Saída'),
-                        selected: !_isEntrada,
-                        selectedColor: Colors.red[100],
-                        backgroundColor: isDarkMode
-                            ? Colors.grey[700]
-                            : Colors.grey[200],
-                        labelStyle: TextStyle(
-                          color: !_isEntrada
-                              ? Colors.red[800]
-                              : theme.colorScheme.onSurface,
+                      Expanded(
+                        child: _buildTypePill(
+                          context,
+                          label: 'Saída',
+                          selected: !_isEntrada,
+                          selectedColor: Colors.red,
+                          onTap: () => setState(() => _isEntrada = false),
                         ),
-                        onSelected: (selected) {
-                          setState(() {
-                            _isEntrada = false;
-                          });
+                      ),
+                    ],
+                  ),
+                ),
+
+                const SizedBox(height: 12),
+
+                // Seção: Informações principais
+                _buildSection(
+                  context,
+                  title: 'Informações',
+                  child: Column(
+                    children: [
+                      TextFormField(
+                        controller: _descricaoController,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: 'Descrição',
+                          hintText: 'Ex.: Venda de produto',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.description_outlined),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceVariant
+                              .withOpacity(0.4),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, informe a descrição';
+                          }
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _valorController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                          decimal: true,
+                        ),
+                        inputFormatters: [
+                          FilteringTextInputFormatter.allow(RegExp(r'[0-9.,]')),
+                        ],
+                        decoration: InputDecoration(
+                          labelText: 'Valor',
+                          hintText: '0,00',
+                          prefixText: 'R\$ ',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.attach_money),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceVariant
+                              .withOpacity(0.4),
+                          helperText: 'Use vírgula para centavos. Ex.: 123,45',
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, informe o valor';
+                          }
+                          final sanitized = value
+                              .replaceAll('.', '')
+                              .replaceAll(',', '.');
+                          final parsed = double.tryParse(sanitized);
+                          if (parsed == null) return 'Valor inválido';
+                          if (parsed <= 0)
+                            return 'Informe um valor maior que zero';
+                          return null;
+                        },
+                      ),
+                      const SizedBox(height: 12),
+                      GestureDetector(
+                        onTap: () => _selectDate(context),
+                        child: AbsorbPointer(
+                          child: TextFormField(
+                            controller: _dataController,
+                            decoration: InputDecoration(
+                              labelText: 'Data',
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              prefixIcon: const Icon(
+                                Icons.calendar_today_outlined,
+                              ),
+                              suffixIcon: IconButton(
+                                icon: const Icon(Icons.edit_calendar_outlined),
+                                onPressed: () => _selectDate(context),
+                                tooltip: 'Selecionar data',
+                              ),
+                              filled: true,
+                              fillColor: theme.colorScheme.surfaceVariant
+                                  .withOpacity(0.4),
+                            ),
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Por favor, informe a data';
+                              }
+                              return null;
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextFormField(
+                        controller: _usuarioController,
+                        textInputAction: TextInputAction.next,
+                        decoration: InputDecoration(
+                          labelText: 'Nome do Usuário',
+                          hintText: 'Quem realizou o lançamento?',
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          prefixIcon: const Icon(Icons.person_outline),
+                          filled: true,
+                          fillColor: theme.colorScheme.surfaceVariant
+                              .withOpacity(0.4),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Por favor, informe o nome do usuário';
+                          }
+                          return null;
                         },
                       ),
                     ],
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 20),
+                const SizedBox(height: 12),
 
-              // Descrição
-              TextFormField(
-                controller: _descricaoController,
-                decoration: InputDecoration(
-                  labelText: 'Descrição',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.description),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceVariant,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, informe a descrição';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Valor
-              TextFormField(
-                controller: _valorController,
-                keyboardType: const TextInputType.numberWithOptions(
-                  decimal: true,
-                ),
-                decoration: InputDecoration(
-                  labelText: 'Valor R\$',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.attach_money),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceVariant,
-                ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, informe o valor';
-                  }
-                  try {
-                    double.parse(value.replaceAll(',', '.'));
-                  } catch (e) {
-                    return 'Valor inválido';
-                  }
-                  return null;
-                },
-              ),
-
-              const SizedBox(height: 16),
-
-              // Data
-              GestureDetector(
-                onTap: () => _selectDate(context),
-                child: AbsorbPointer(
-                  child: TextFormField(
-                    controller: _dataController,
+                // Seção: Pagamento
+                _buildSection(
+                  context,
+                  title: 'Forma de Pagamento',
+                  child: DropdownButtonFormField<String>(
+                    value: _formaPagamento,
                     decoration: InputDecoration(
-                      labelText: 'Data',
                       border: OutlineInputBorder(
                         borderRadius: BorderRadius.circular(12),
                       ),
-                      prefixIcon: const Icon(Icons.calendar_today),
-                      suffixIcon: const Icon(Icons.arrow_drop_down),
+                      prefixIcon: const Icon(
+                        Icons.account_balance_wallet_outlined,
+                      ),
                       filled: true,
-                      fillColor: theme.colorScheme.surfaceVariant,
+                      fillColor: theme.colorScheme.surfaceVariant.withOpacity(
+                        0.4,
+                      ),
                     ),
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Por favor, informe a data';
-                      }
-                      return null;
-                    },
+                    items: const [
+                      DropdownMenuItem(
+                        value: 'Dinheiro',
+                        child: Text('Dinheiro'),
+                      ),
+                      DropdownMenuItem(value: 'Pix', child: Text('Pix')),
+                      DropdownMenuItem(
+                        value: 'Cartão de Crédito',
+                        child: Text('Cartão de Crédito'),
+                      ),
+                      DropdownMenuItem(
+                        value: 'Cartão de Débito',
+                        child: Text('Cartão de Débito'),
+                      ),
+                    ],
+                    onChanged: (v) =>
+                        setState(() => _formaPagamento = v ?? 'Dinheiro'),
                   ),
                 ),
-              ),
 
-              const SizedBox(height: 16),
+                const SizedBox(height: 12),
 
-              // Usuário
-              TextFormField(
-                controller: _usuarioController,
-                decoration: InputDecoration(
-                  labelText: 'Nome do Usuário',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
+                // Seção: Observação
+                _buildSection(
+                  context,
+                  title: 'Observação',
+                  child: TextFormField(
+                    controller: _observacaoController,
+                    maxLines: 4,
+                    decoration: InputDecoration(
+                      labelText: 'Observação (opcional)',
+                      hintText: 'Adicione detalhes relevantes',
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      prefixIcon: const Icon(Icons.note_outlined),
+                      filled: true,
+                      fillColor: theme.colorScheme.surfaceVariant.withOpacity(
+                        0.4,
+                      ),
+                    ),
                   ),
-                  prefixIcon: const Icon(Icons.person),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceVariant,
                 ),
-                validator: (value) {
-                  if (value == null || value.isEmpty) {
-                    return 'Por favor, informe o nome do usuário';
-                  }
-                  return null;
-                },
+              ],
+            ),
+          ),
+        ),
+      ),
+      // Botão fixo inferior para melhor UX móvel
+      bottomNavigationBar: SafeArea(
+        top: false,
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
+          child: SizedBox(
+            height: 56,
+            width: double.infinity,
+            child: ElevatedButton.icon(
+              onPressed: _salvarLancamento,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: _isEntrada
+                    ? Colors.green.shade600
+                    : Colors.red.shade600,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                elevation: 3,
               ),
-
-              const SizedBox(height: 20),
-
-              // Forma de pagamento
-              Text(
-                'Forma de Pagamento',
-                style: theme.textTheme.titleMedium?.copyWith(
+              icon: const Icon(Icons.check_circle_outline),
+              label: Text(
+                _isEntrada ? 'Registrar Entrada' : 'Registrar Saída',
+                style: theme.textTheme.labelLarge?.copyWith(
+                  color: Colors.white,
                   fontWeight: FontWeight.bold,
                 ),
               ),
-
-              const SizedBox(height: 12),
-
-              Wrap(
-                spacing: 12.0,
-                runSpacing: 12.0,
-                children: [
-                  _buildFormaChip('Dinheiro', Icons.money),
-                  _buildFormaChip('Pix', Icons.pix),
-                  _buildFormaChip('Cartão de Crédito', Icons.credit_card),
-                  _buildFormaChip('Cartão de Débito', Icons.payment),
-                ],
-              ),
-
-              const SizedBox(height: 20),
-
-              // Observação
-              TextFormField(
-                controller: _observacaoController,
-                maxLines: 4,
-                decoration: InputDecoration(
-                  labelText: 'Observação (opcional)',
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  prefixIcon: const Icon(Icons.note),
-                  filled: true,
-                  fillColor: theme.colorScheme.surfaceVariant,
-                ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // Botão Salvar
-              SizedBox(
-                width: double.infinity,
-                height: 56,
-                child: ElevatedButton(
-                  onPressed: _salvarLancamento,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: _isEntrada
-                        ? Colors.green[600]
-                        : Colors.red[600],
-                    foregroundColor: Colors.white,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    elevation: 2,
-                  ),
-                  child: Text(
-                    'Salvar Lançamento',
-                    style: theme.textTheme.labelLarge?.copyWith(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFormaChip(String label, IconData icon) {
-    return FilterChip(
-      label: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(
-            icon,
-            size: 20,
-            color: _formaPagamento == label ? Colors.blue[800] : null,
-          ),
-          const SizedBox(width: 8),
-          Text(label),
-        ],
+  // Helper de seção com título e conteúdo
+  Widget _buildSection(
+    BuildContext context, {
+    required String title,
+    required Widget child,
+  }) {
+    final theme = Theme.of(context);
+    return Card(
+      elevation: 1.5,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(16, 14, 16, 16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              title,
+              style: theme.textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: theme.colorScheme.onSurface.withOpacity(0.9),
+              ),
+            ),
+            const SizedBox(height: 12),
+            child,
+          ],
+        ),
       ),
-      selected: _formaPagamento == label,
-      onSelected: (selected) {
-        setState(() {
-          _formaPagamento = label;
-        });
-      },
-      selectedColor: Colors.blue[100],
-      backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-      checkmarkColor: Colors.blue[800],
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+    );
+  }
+
+  // Botões de seleção de tipo em estilo "pill"
+  Widget _buildTypePill(
+    BuildContext context, {
+    required String label,
+    required bool selected,
+    required Color selectedColor,
+    required VoidCallback onTap,
+  }) {
+    final theme = Theme.of(context);
+    final bg = selected
+        ? selectedColor.withOpacity(0.15)
+        : theme.colorScheme.surfaceVariant.withOpacity(0.6);
+    final fg = selected
+        ? selectedColor
+        : theme.colorScheme.onSurface.withOpacity(0.7);
+
+    return InkWell(
+      borderRadius: BorderRadius.circular(999),
+      onTap: onTap,
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+        decoration: BoxDecoration(
+          color: bg,
+          borderRadius: BorderRadius.circular(999),
+          border: Border.all(
+            color: selected
+                ? selectedColor.withOpacity(0.6)
+                : theme.dividerColor.withOpacity(0.4),
+          ),
+        ),
+        alignment: Alignment.center,
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              label == 'Entrada'
+                  ? Icons.arrow_downward_rounded
+                  : Icons.arrow_upward_rounded,
+              color: fg,
+              size: 18,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: theme.textTheme.labelLarge?.copyWith(
+                color: fg,
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+          ],
+        ),
+      ),
     );
   }
 }

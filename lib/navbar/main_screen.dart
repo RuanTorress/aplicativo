@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:altgest/homepage/home_page.dart';
 import 'package:altgest/caixa/caixa.dart';
+import 'package:altgest/procedimentos/taps.dart';
+import 'package:altgest/estoque/estoque.dart';
+import 'package:altgest/notas/notas.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({Key? key}) : super(key: key);
@@ -16,19 +20,30 @@ class _MainScreenState extends State<MainScreen> {
   final List<Widget> _pages = [
     HomePage(),
     CaixaPage(),
-    Center(child: Text('Perfil')), // Substitua pelo widget de perfil
-    Center(
-      child: Text('Notificações'),
-    ), // Substitua pelo widget de notificações
-    Center(
-      child: Text('Configurações'),
-    ), // Substitua pelo widget de configurações
+    Center(child: Text('Perfil')),
+    ProcedimentosTabs(),
+    EstoquePage(),
+    NotasPage(),
+    Center(child: Text('Configurações')),
   ];
 
   void _onItemSelected(int index) {
     setState(() {
       _currentIndex = index;
     });
+  }
+
+  void _logout(BuildContext context) {
+    FirebaseAuth.instance
+        .signOut()
+        .then((_) {
+          Navigator.of(context).pushReplacementNamed('/');
+        })
+        .catchError((error) {
+          ScaffoldMessenger.of(
+            context,
+          ).showSnackBar(SnackBar(content: Text('Erro ao sair: $error')));
+        });
   }
 
   @override
@@ -90,7 +105,7 @@ class _MainScreenState extends State<MainScreen> {
           ),
           ListTile(
             leading: Icon(Icons.notifications),
-            title: Text('Notificações'),
+            title: Text('Procedimentos'),
             selected: _currentIndex == 3,
             onTap: () {
               _onItemSelected(3);
@@ -98,13 +113,37 @@ class _MainScreenState extends State<MainScreen> {
             },
           ),
           ListTile(
-            leading: Icon(Icons.settings),
-            title: Text('Configurações'),
+            leading: Icon(Icons.inventory),
+            title: Text('Estoque'),
             selected: _currentIndex == 4,
             onTap: () {
               _onItemSelected(4);
               Navigator.pop(context);
             },
+          ),
+          ListTile(
+            leading: Icon(Icons.note),
+            title: Text('Notas'),
+            selected: _currentIndex == 5,
+            onTap: () {
+              _onItemSelected(5);
+              Navigator.pop(context);
+            },
+          ),
+          ListTile(
+            leading: Icon(Icons.settings),
+            title: Text('Configurações'),
+            selected: _currentIndex == 6,
+            onTap: () {
+              _onItemSelected(6);
+              Navigator.pop(context);
+            },
+          ),
+          Divider(), // Separator line
+          ListTile(
+            leading: Icon(Icons.exit_to_app, color: Colors.red),
+            title: Text('Sair', style: TextStyle(color: Colors.red)),
+            onTap: () => _logout(context),
           ),
         ],
       ),
@@ -120,8 +159,12 @@ class _MainScreenState extends State<MainScreen> {
       case 2:
         return Text('AltGest - Perfil');
       case 3:
-        return Text('AltGest - Notificações');
+        return Text('AltGest - Procedimentos');
       case 4:
+        return Text('AltGest - Estoque');
+      case 5:
+        return Text('AltGest - Notas');
+      case 6:
         return Text('AltGest - Configurações');
       default:
         return Text('AltGest');

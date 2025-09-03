@@ -1,4 +1,6 @@
 import 'package:altgest/navbar/main_screen.dart';
+import 'package:altgest/estoque/estoque.dart';
+import 'package:altgest/notas/notas.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
@@ -15,9 +17,17 @@ void main() async {
   // Inicializa Hive para Web/Mobile
   await Hive.initFlutter();
 
+  // Registra os adapters
+  Hive.registerAdapter(ItemEstoqueAdapter());
+  Hive.registerAdapter(NotaAdapter());
+
   // Abre as boxes (como se fossem tabelas)
+  await Hive.openBox('procedimentos');
+  await Hive.openBox('pacotes');
   await Hive.openBox('meuBanco');
   await Hive.openBox('caixaBanco');
+  await Hive.openBox<ItemEstoque>('estoque');
+  await Hive.openBox<Nota>('notas');
 
   runApp(MyApp());
 }
