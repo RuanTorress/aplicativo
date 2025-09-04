@@ -5,14 +5,17 @@ import 'package:intl/intl.dart';
 import 'package:uuid/uuid.dart';
 
 class LancamentoPage extends StatefulWidget {
-  const LancamentoPage({super.key});
+  const LancamentoPage({super.key, this.lancamento, this.lancamentoKey});
+
+  final Map<String, dynamic>? lancamento; // Dados para edição
+  final String? lancamentoKey; // Chave para edição
 
   @override
   _LancamentoPageState createState() => _LancamentoPageState();
 }
 
 class _LancamentoPageState extends State<LancamentoPage> {
-  final box = Hive.box('caixaBanco');
+  final box = Hive.box('caixabanco');
   final _formKey = GlobalKey<FormState>();
   final _uuid = const Uuid();
 
@@ -40,8 +43,25 @@ class _LancamentoPageState extends State<LancamentoPage> {
   void initState() {
     super.initState();
     _dataController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
-    // Formatar valor enquanto digita em padrão BR (ex: 1.234,56)
     _valorController.addListener(_onValorChanged);
+
+    // Preencher campos se for edição
+    if (widget.lancamento != null) {
+      final lanc = widget.lancamento!;
+      _descricaoController.text = lanc['descricao'] ?? '';
+      _valorController.text =
+          (lanc['valor'] as double?)
+              ?.abs()
+              .toStringAsFixed(2)
+              .replaceAll('.', ',') ??
+          '';
+      _usuarioController.text = lanc['usuario'] ?? '';
+      _observacaoController.text = lanc['observacao'] ?? '';
+      _formaPagamento = lanc['formaPagamento'] ?? 'Dinheiro';
+      _isEntrada = (lanc['valor'] as double?)?.isNegative != true;
+      _selectedDate = DateTime.parse(lanc['data']);
+      _dataController.text = DateFormat('dd/MM/yyyy').format(_selectedDate);
+    }
   }
 
   @override
@@ -135,18 +155,30 @@ class _LancamentoPageState extends State<LancamentoPage> {
         valor = -valor;
       }
 
-      // Gera um ID único para o lançamento
-      String id = _uuid.v4();
-
-      await box.put(id, {
-        'descricao': _descricaoController.text,
-        'valor': valor,
-        'usuario': _usuarioController.text,
-        'observacao': _observacaoController.text,
-        'formaPagamento': _formaPagamento,
-        'data': _selectedDate.toIso8601String(),
-        'tipo': _isEntrada ? 'Entrada' : 'Saída',
-      });
+      if (widget.lancamentoKey != null) {
+        // Edição: atualizar chave existente
+        await box.put(widget.lancamentoKey!, {
+          'descricao': _descricaoController.text,
+          'valor': valor,
+          'usuario': _usuarioController.text,
+          'observacao': _observacaoController.text,
+          'formaPagamento': _formaPagamento,
+          'data': _selectedDate.toIso8601String(),
+          'tipo': _isEntrada ? 'Entrada' : 'Saída',
+        });
+      } else {
+        // Novo: gerar nova chave
+        String id = _uuid.v4();
+        await box.put(id, {
+          'descricao': _descricaoController.text,
+          'valor': valor,
+          'usuario': _usuarioController.text,
+          'observacao': _observacaoController.text,
+          'formaPagamento': _formaPagamento,
+          'data': _selectedDate.toIso8601String(),
+          'tipo': _isEntrada ? 'Entrada' : 'Saída',
+        });
+      }
 
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text("Lançamento salvo com sucesso!")),

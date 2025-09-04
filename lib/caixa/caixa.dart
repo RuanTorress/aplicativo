@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:intl/intl.dart';
 import '../lancamento/lancamento.dart';
-import 'novo_lancamento.dart'; // Adicione esta linha para importar o dialog
 
 class CaixaPage extends StatefulWidget {
   @override
@@ -11,7 +10,7 @@ class CaixaPage extends StatefulWidget {
 
 class _CaixaPageState extends State<CaixaPage>
     with SingleTickerProviderStateMixin {
-  final box = Hive.box('caixaBanco');
+  final box = Hive.box('caixabanco');
   List<Map<String, dynamic>> _lancamentos = [];
   double _saldoTotal = 0;
   double _metaMensal = 0;
@@ -137,7 +136,7 @@ class _CaixaPageState extends State<CaixaPage>
     });
   }
 
-  Future<void> _deletarLancamento(int key) async {
+  Future<void> _deletarLancamento(String key) async {
     await box.delete(key);
     _refreshLancamentos();
 
@@ -164,16 +163,18 @@ class _CaixaPageState extends State<CaixaPage>
     }
   }
 
-  void _editarLancamento(int key, Map<String, dynamic> value) {
-    showDialog(
-      context: context,
-      builder: (context) => NovoLancamentoDialog(
-        box: box,
-        onSave: _refreshLancamentos,
-        lancamento: value,
-        lancamentoKey: key, // Corrigido: passar lancamentoKey em vez de key
+  void _editarLancamento(String key, Map<String, dynamic> value) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (context) =>
+            LancamentoPage(lancamento: value, lancamentoKey: key),
       ),
-    );
+    ).then((result) {
+      if (result == true) {
+        _refreshLancamentos();
+      }
+    });
   }
 
   @override
@@ -244,12 +245,14 @@ class _CaixaPageState extends State<CaixaPage>
           ),
           IconButton(
             icon: Icon(Icons.add, color: Colors.white, size: 28),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (context) =>
-                    NovoLancamentoDialog(box: box, onSave: _refreshLancamentos),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => LancamentoPage()),
               );
+              if (result == true) {
+                _refreshLancamentos(); // Atualiza a lista após salvar
+              }
             },
           ),
         ],
@@ -625,7 +628,7 @@ class _CaixaPageState extends State<CaixaPage>
                         final lancamento = _lancamentos[index];
                         final value =
                             lancamento['value'] as Map<String, dynamic>;
-                        final key = lancamento['key'] as int;
+                        final key = lancamento['key'] as String;
 
                         return Card(
                           margin: EdgeInsets.only(bottom: 12),
