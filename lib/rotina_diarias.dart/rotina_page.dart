@@ -29,6 +29,8 @@ class _RotinasPageState extends State<RotinasPage>
     'Saúde',
   ];
   String _categoriaFiltro = 'Todas';
+  bool _showFilters =
+      true; // Novo estado para controlar visibilidade dos filtros
 
   @override
   void initState() {
@@ -243,10 +245,10 @@ class _RotinasPageState extends State<RotinasPage>
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        elevation: 0,
+        elevation: 2,
         backgroundColor: primaryColor,
         automaticallyImplyLeading: false, // Remove a seta de voltar automática
-        centerTitle: true,
+        centerTitle: false, // Para alinhar à esquerda
         title: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
@@ -259,7 +261,7 @@ class _RotinasPageState extends State<RotinasPage>
                     text: 'Minhas ',
                     style: TextStyle(
                       fontWeight: FontWeight.w600,
-                      fontSize: 22,
+                      fontSize: 18, // Reduzido para evitar overflow
                       color: Colors.white,
                     ),
                   ),
@@ -267,7 +269,7 @@ class _RotinasPageState extends State<RotinasPage>
                     text: 'Rotinas',
                     style: TextStyle(
                       fontWeight: FontWeight.bold,
-                      fontSize: 22,
+                      fontSize: 18, // Reduzido para evitar overflow
                       color: Colors.greenAccent,
                     ),
                   ),
@@ -276,6 +278,32 @@ class _RotinasPageState extends State<RotinasPage>
             ),
           ],
         ),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _showFilters ? Icons.visibility_off : Icons.visibility,
+              color: Colors.white,
+              size: 28,
+            ),
+            onPressed: () {
+              setState(() {
+                _showFilters = !_showFilters;
+              });
+            },
+          ),
+          IconButton(
+            icon: Icon(Icons.add, color: Colors.white, size: 28),
+            onPressed: () async {
+              final result = await Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => RotinaFormPage()),
+              );
+              if (result == true) {
+                _refreshRotinas();
+              }
+            },
+          ),
+        ],
         bottom: TabBar(
           controller: _tabController,
           tabs: [
@@ -431,100 +459,105 @@ class _RotinasPageState extends State<RotinasPage>
                 ),
               ),
 
-              // Filtros e Busca
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 24.0),
-                child: Card(
-                  color: cardColor,
-                  elevation: 0,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                    side: BorderSide(
-                      color: isDarkMode ? Colors.grey[800]! : Colors.grey[200]!,
-                      width: 1,
+              // Filtros e Busca (agora condicional)
+              if (_showFilters)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0),
+                  child: Card(
+                    color: cardColor,
+                    elevation: 10, // Adicionado sombra para destacar
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(16),
+                      side: BorderSide(
+                        color: isDarkMode
+                            ? Colors.grey[800]!
+                            : Colors.grey[200]!,
+                        width: 1,
+                      ),
                     ),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(16.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Filtrar Rotinas',
-                          style: TextStyle(
-                            fontSize: 16,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        SizedBox(height: 12),
-                        TextField(
-                          controller: _searchController,
-                          decoration: InputDecoration(
-                            labelText: 'Buscar rotina',
-                            prefixIcon: Icon(Icons.search),
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: BorderSide.none,
+                    child: Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Filtrar Rotinas',
+                            style: TextStyle(
+                              fontSize: 16,
+                              fontWeight: FontWeight.bold,
                             ),
-                            filled: true,
-                            fillColor: isDarkMode
-                                ? Colors.grey[800]
-                                : Colors.grey[100],
-                            contentPadding: EdgeInsets.symmetric(vertical: 14),
                           ),
-                          onChanged: (value) {
-                            setState(() {
-                              _searchQuery = value;
-                            });
-                            _refreshRotinas();
-                          },
-                        ),
-                        SizedBox(height: 16),
-                        Text(
-                          'Categorias:',
-                          style: TextStyle(fontWeight: FontWeight.w500),
-                        ),
-                        SizedBox(height: 8),
-                        SingleChildScrollView(
-                          scrollDirection: Axis.horizontal,
-                          child: Row(
-                            children: _categorias.map((categoria) {
-                              bool isSelected = _categoriaFiltro == categoria;
-                              return Padding(
-                                padding: const EdgeInsets.only(right: 8.0),
-                                child: ChoiceChip(
-                                  label: Text(categoria),
-                                  selected: isSelected,
-                                  selectedColor: isSelected
-                                      ? _getCategoriaColor(
-                                          categoria,
-                                        ).withOpacity(0.2)
-                                      : null,
-                                  labelStyle: TextStyle(
-                                    color: isSelected
-                                        ? _getCategoriaColor(categoria)
+                          SizedBox(height: 12),
+                          TextField(
+                            controller: _searchController,
+                            decoration: InputDecoration(
+                              labelText: 'Buscar rotina',
+                              prefixIcon: Icon(Icons.search),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide.none,
+                              ),
+                              filled: true,
+                              fillColor: isDarkMode
+                                  ? Colors.grey[800]
+                                  : Colors.grey[100],
+                              contentPadding: EdgeInsets.symmetric(
+                                vertical: 14,
+                              ),
+                            ),
+                            onChanged: (value) {
+                              setState(() {
+                                _searchQuery = value;
+                              });
+                              _refreshRotinas();
+                            },
+                          ),
+                          SizedBox(height: 16),
+                          Text(
+                            'Categorias:',
+                            style: TextStyle(fontWeight: FontWeight.w500),
+                          ),
+                          SizedBox(height: 8),
+                          SingleChildScrollView(
+                            scrollDirection: Axis.horizontal,
+                            child: Row(
+                              children: _categorias.map((categoria) {
+                                bool isSelected = _categoriaFiltro == categoria;
+                                return Padding(
+                                  padding: const EdgeInsets.only(right: 8.0),
+                                  child: ChoiceChip(
+                                    label: Text(categoria),
+                                    selected: isSelected,
+                                    selectedColor: isSelected
+                                        ? _getCategoriaColor(
+                                            categoria,
+                                          ).withOpacity(0.2)
                                         : null,
-                                    fontWeight: isSelected
-                                        ? FontWeight.bold
-                                        : FontWeight.normal,
+                                    labelStyle: TextStyle(
+                                      color: isSelected
+                                          ? _getCategoriaColor(categoria)
+                                          : null,
+                                      fontWeight: isSelected
+                                          ? FontWeight.bold
+                                          : FontWeight.normal,
+                                    ),
+                                    onSelected: (selected) {
+                                      setState(() {
+                                        _categoriaFiltro = categoria;
+                                      });
+                                      _refreshRotinas();
+                                    },
                                   ),
-                                  onSelected: (selected) {
-                                    setState(() {
-                                      _categoriaFiltro = categoria;
-                                    });
-                                    _refreshRotinas();
-                                  },
-                                ),
-                              );
-                            }).toList(),
+                                );
+                              }).toList(),
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),
-              ),
-
+              SizedBox(height: 8),
               // Seção de rotinas
               Container(
                 width: double.infinity,
@@ -653,14 +686,14 @@ class _RotinasPageState extends State<RotinasPage>
                             );
                           },
                           child: Card(
-                            elevation: 0,
+                            elevation: 10, // Adicionado sombra para destacar
                             color: cardColor,
                             margin: EdgeInsets.only(bottom: 12),
                             shape: RoundedRectangleBorder(
                               borderRadius: BorderRadius.circular(16),
                               side: BorderSide(
                                 color: isDarkMode
-                                    ? Colors.grey[800]!
+                                    ? const Color.fromARGB(255, 10, 10, 10)!
                                     : Colors.grey[200]!,
                                 width: 1,
                               ),
@@ -883,28 +916,9 @@ class _RotinasPageState extends State<RotinasPage>
                         );
                       },
                     ),
-              // Espaço adicional no final para evitar que o FAB sobreponha conteúdo
-              SizedBox(height: 80),
             ],
           ),
         ),
-      ),
-      floatingActionButton: FloatingActionButton.extended(
-        onPressed: () async {
-          final result = await Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => RotinaFormPage()),
-          );
-          if (result == true) {
-            _refreshRotinas();
-          }
-        },
-        icon: Icon(Icons.add),
-        label: Text('Nova Rotina'),
-        backgroundColor: primaryColor,
-        foregroundColor: Colors.white,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        elevation: 4,
       ),
     );
   }

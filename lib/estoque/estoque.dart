@@ -257,46 +257,57 @@ class _EstoquePageState extends State<EstoquePage>
   @override
   Widget build(BuildContext context) {
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
+    final theme = Theme.of(context);
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final primaryColor = isDarkMode
+        ? Colors.indigoAccent[700]
+        : Colors.indigo[700];
 
     return Scaffold(
-      /* appBar: AppBar(
-        title: Text('Estoque', style: TextStyle(fontWeight: FontWeight.bold)),
-        backgroundColor: Colors.blue.shade600,
-        foregroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: primaryColor,
+        automaticallyImplyLeading: false,
         elevation: 0,
-        flexibleSpace: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [Colors.blue.shade700, Colors.blue.shade500],
+        flexibleSpace: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(
+              horizontal: 16.0,
+              vertical: 8.0,
             ),
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Icon(Icons.add_circle),
-            onPressed: () => _adicionarOuEditarItem(),
-            tooltip: 'Adicionar Novo Item',
-          ),
-        ],
-      ), */
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.blue.shade50, Colors.white],
-          ),
-        ),
-        child: Column(
-          children: [
-            Container(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              color: Colors.white,
-              child: Column(
-                children: [
-                  TextField(
+            child: Row(
+              children: [
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.inventory_2, color: Colors.white, size: 28),
+                    SizedBox(width: 10),
+                    Text.rich(
+                      TextSpan(
+                        children: [
+                          TextSpan(
+                            text: 'Meu ',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              fontSize: 22,
+                              color: Colors.white,
+                            ),
+                          ),
+                          TextSpan(
+                            text: 'Estoque',
+                            style: TextStyle(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 22,
+                              color: Colors.greenAccent,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+                SizedBox(width: 16),
+                Expanded(
+                  child: TextField(
                     controller: _searchController,
                     onChanged: (value) {
                       setState(() {
@@ -333,9 +344,22 @@ class _EstoquePageState extends State<EstoquePage>
                       ),
                     ),
                   ),
-                ],
-              ),
+                ),
+              ],
             ),
+          ),
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [Colors.blue.shade50, Colors.white],
+          ),
+        ),
+        child: Column(
+          children: [
             Expanded(
               child: ValueListenableBuilder(
                 valueListenable: _estoqueBox.listenable(),

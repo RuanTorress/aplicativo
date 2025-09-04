@@ -201,8 +201,11 @@ class ProcedimentosScreen extends StatelessWidget {
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () => _adicionarOuEditarProcedimento(context),
-        icon: Icon(Icons.add),
-        label: Text('Adicionar'),
+        icon: Icon(Icons.add, color: Colors.white),
+        label: Text(
+          'Novo',
+          style: TextStyle(color: Colors.white), // Define a cor do texto
+        ),
         backgroundColor: Colors.blueAccent,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
       ),
