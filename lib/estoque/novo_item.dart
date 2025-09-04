@@ -214,42 +214,53 @@ class _NovoItemDialogState extends State<NovoItemDialog> {
                           DateFormat('dd/MM/yyyy').format(data),
                           style: TextStyle(fontSize: 16),
                         ),
-                        Spacer(),
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            DateTime? novaData = await showDatePicker(
-                              context: context,
-                              initialDate: data,
-                              firstDate: DateTime(2000),
-                              lastDate: DateTime.now(),
-                              builder: (context, child) {
-                                return Theme(
-                                  data: ThemeData.light().copyWith(
-                                    colorScheme: ColorScheme.light(
-                                      primary: Colors.blue,
-                                      onPrimary: Colors.white,
-                                      surface: Colors.white,
+                        SizedBox(width: 8),
+                        SizedBox(
+                          height: 32,
+                          child: ElevatedButton.icon(
+                            onPressed: () async {
+                              DateTime? novaData = await showDatePicker(
+                                context: context,
+                                initialDate: data,
+                                firstDate: DateTime(2000),
+                                lastDate: DateTime.now(),
+                                builder: (context, child) {
+                                  return Theme(
+                                    data: ThemeData.light().copyWith(
+                                      colorScheme: ColorScheme.light(
+                                        primary: Colors.blue,
+                                        onPrimary: Colors.white,
+                                        surface: Colors.white,
+                                      ),
                                     ),
-                                  ),
-                                  child: child!,
-                                );
-                              },
-                            );
-                            if (novaData != null) {
-                              setState(() {
-                                data = novaData;
-                              });
-                              widget.onDataChanged(novaData);
-                            }
-                          },
-                          icon: Icon(Icons.edit_calendar),
-                          label: Text('Alterar'),
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: Colors.blue,
-                            foregroundColor: Colors.white,
-                            elevation: 2,
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(8),
+                                    child: child!,
+                                  );
+                                },
+                              );
+                              if (novaData != null) {
+                                setState(() {
+                                  data = novaData;
+                                });
+                                widget.onDataChanged(novaData);
+                              }
+                            },
+                            icon: Icon(Icons.edit_calendar, size: 18),
+                            label: Text(
+                              'Alterar',
+                              style: TextStyle(fontSize: 13),
+                            ),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: Colors.blue,
+                              foregroundColor: Colors.white,
+                              elevation: 2,
+                              minimumSize: Size(80, 32),
+                              padding: EdgeInsets.symmetric(
+                                horizontal: 10,
+                                vertical: 0,
+                              ),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(8),
+                              ),
                             ),
                           ),
                         ),

@@ -243,9 +243,38 @@ class _RotinasPageState extends State<RotinasPage>
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        title: Text('Minhas Rotinas'),
         elevation: 0,
         backgroundColor: primaryColor,
+        centerTitle: true,
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.event_note, color: Colors.white, size: 28),
+            SizedBox(width: 10),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Minhas ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 22,
+                      color: Colors.white,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Rotinas',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
         bottom: TabBar(
           controller: _tabController,
           tabs: [

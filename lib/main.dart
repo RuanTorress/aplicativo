@@ -30,6 +30,7 @@ void main() async {
   await Hive.openBox<ItemEstoque>('estoque');
   await Hive.openBox<Nota>('notas');
   await Hive.openBox('rotinas');
+  await Hive.openBox('agendamentos');
 
   runApp(MyApp());
 }
@@ -40,6 +41,7 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       title: 'Novo aplicativo teste',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
+      debugShowCheckedModeBanner: false, // esta linha remove o banner de debug
       routes: {
         '/main': (context) => MainScreen(),
         '/rotinas': (context) => RotinasPage(),

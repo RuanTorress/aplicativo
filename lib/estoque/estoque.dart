@@ -259,7 +259,7 @@ class _EstoquePageState extends State<EstoquePage>
     final isSmallScreen = MediaQuery.of(context).size.width < 400;
 
     return Scaffold(
-      appBar: AppBar(
+      /* appBar: AppBar(
         title: Text('Estoque', style: TextStyle(fontWeight: FontWeight.bold)),
         backgroundColor: Colors.blue.shade600,
         foregroundColor: Colors.white,
@@ -280,7 +280,7 @@ class _EstoquePageState extends State<EstoquePage>
             tooltip: 'Adicionar Novo Item',
           ),
         ],
-      ),
+      ), */
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
@@ -487,56 +487,30 @@ class _EstoquePageState extends State<EstoquePage>
                                             color: Colors.grey.shade200,
                                           ),
                                         ),
-                                        child: isSmallScreen
-                                            ? Column(
-                                                children: [
-                                                  _buildInfoColumn(
-                                                    Icons.shopping_cart,
-                                                    'Quantidade',
-                                                    '${item.quantidade}',
-                                                    Colors.green,
-                                                  ),
-                                                  SizedBox(height: 8),
-                                                  _buildInfoColumn(
-                                                    Icons.attach_money,
-                                                    'Valor unitário',
-                                                    'R\$ ${item.valorUnitario.toStringAsFixed(2)}',
-                                                    Colors.amber.shade800,
-                                                  ),
-                                                  SizedBox(height: 8),
-                                                  _buildInfoColumn(
-                                                    Icons.calculate,
-                                                    'Valor total',
-                                                    'R\$ ${(item.quantidade * item.valorUnitario).toStringAsFixed(2)}',
-                                                    Colors.purple,
-                                                  ),
-                                                ],
-                                              )
-                                            : Row(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceAround,
-                                                children: [
-                                                  _buildInfoColumn(
-                                                    Icons.shopping_cart,
-                                                    'Quantidade',
-                                                    '${item.quantidade}',
-                                                    Colors.green,
-                                                  ),
-                                                  _buildInfoColumn(
-                                                    Icons.attach_money,
-                                                    'Valor unitário',
-                                                    'R\$ ${item.valorUnitario.toStringAsFixed(2)}',
-                                                    Colors.amber.shade800,
-                                                  ),
-                                                  _buildInfoColumn(
-                                                    Icons.calculate,
-                                                    'Valor total',
-                                                    'R\$ ${(item.quantidade * item.valorUnitario).toStringAsFixed(2)}',
-                                                    Colors.purple,
-                                                  ),
-                                                ],
-                                              ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceAround,
+                                          children: [
+                                            _buildInfoColumn(
+                                              Icons.shopping_cart,
+                                              'Quantidade',
+                                              '${item.quantidade}',
+                                              Colors.green,
+                                            ),
+                                            _buildInfoColumn(
+                                              Icons.attach_money,
+                                              'Valor unitário',
+                                              'R\$ ${item.valorUnitario.toStringAsFixed(2)}',
+                                              Colors.amber.shade800,
+                                            ),
+                                            _buildInfoColumn(
+                                              Icons.calculate,
+                                              'Valor total',
+                                              'R\$ ${(item.quantidade * item.valorUnitario).toStringAsFixed(2)}',
+                                              Colors.purple,
+                                            ),
+                                          ],
+                                        ),
                                       ),
                                       SizedBox(height: 12),
                                       isSmallScreen
