@@ -245,6 +245,7 @@ class _RotinasPageState extends State<RotinasPage>
       appBar: AppBar(
         elevation: 0,
         backgroundColor: primaryColor,
+        automaticallyImplyLeading: false, // Remove a seta de voltar automática
         centerTitle: true,
         title: Row(
           mainAxisSize: MainAxisSize.min,

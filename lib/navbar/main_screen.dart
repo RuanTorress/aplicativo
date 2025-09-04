@@ -1,7 +1,7 @@
 import 'package:altgest/caledario/calendario_view.dart';
 import 'package:altgest/home_inicio/home.dart';
+import 'package:altgest/navbar/saida.dart';
 import 'package:flutter/material.dart';
-import 'package:altgest/homepage/home_page.dart';
 import 'package:altgest/caixa/caixa.dart';
 import 'package:altgest/procedimentos/taps.dart';
 import 'package:altgest/estoque/estoque.dart';
@@ -83,60 +83,17 @@ class _MainScreenState extends State<MainScreen>
     Navigator.pop(context);
   }
 
-  void _logout(BuildContext context) {
-    // Mostrar dialog de confirmação
-    showDialog(
-      context: context,
-      builder: (BuildContext context) {
-        return AlertDialog(
-          title: Text('Confirmar saída'),
-          content: Text('Tem certeza que deseja sair do aplicativo?'),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: Text('Cancelar'),
-            ),
-            ElevatedButton(
-              onPressed: () {
-                Navigator.pop(context); // Fecha o dialog
-                FirebaseAuth.instance
-                    .signOut()
-                    .then((_) {
-                      Navigator.of(context).pushReplacementNamed('/');
-                    })
-                    .catchError((error) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text('Erro ao sair: $error')),
-                      );
-                    });
-              },
-              style: ElevatedButton.styleFrom(
-                backgroundColor: Colors.red,
-                foregroundColor: Colors.white,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(8),
-                ),
-              ),
-              child: Text('Sair'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    final primaryColor = theme.colorScheme.primary;
-    final appBarColor = isDarkMode ? Color(0xFF1E1E2E) : Colors.white;
+    final primaryColor = isDarkMode
+        ? Colors.indigoAccent[700]
+        : Colors.indigo[700];
     final scaffoldBackgroundColor = isDarkMode
-        ? Color(0xFF121212)
-        : Color(0xFFF5F5F7);
+        ? Color(0xFF1E1E28)
+        : Colors.grey[50];
+    final appBarColor = isDarkMode ? Color(0xFF1E1E28) : Colors.white;
 
     return Scaffold(
       key: _scaffoldKey,
@@ -163,7 +120,7 @@ class _MainScreenState extends State<MainScreen>
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
             child: CircleAvatar(
               radius: 16,
-              backgroundColor: primaryColor.withOpacity(0.2),
+              backgroundColor: primaryColor?.withOpacity(0.2),
               child: Icon(
                 Icons.person_outline_rounded,
                 size: 20,
@@ -181,7 +138,9 @@ class _MainScreenState extends State<MainScreen>
   Widget _buildSideDrawer(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    final primaryColor = theme.colorScheme.primary;
+    final primaryColor = isDarkMode
+        ? Colors.indigoAccent[700]
+        : Colors.indigo[700];
 
     // User info - you can replace with actual user data
     final String userName = "Dev Ruan Torres";
@@ -202,13 +161,13 @@ class _MainScreenState extends State<MainScreen>
             padding: EdgeInsets.fromLTRB(20, 50, 20, 20),
             decoration: BoxDecoration(
               gradient: LinearGradient(
-                colors: [primaryColor.withOpacity(0.8), primaryColor],
+                colors: [?primaryColor?.withOpacity(0.8), ?primaryColor],
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
               ),
               boxShadow: [
                 BoxShadow(
-                  color: primaryColor.withOpacity(0.3),
+                  color: primaryColor!.withOpacity(0.3),
                   blurRadius: 10,
                   offset: Offset(0, 4),
                 ),
@@ -364,7 +323,7 @@ class _MainScreenState extends State<MainScreen>
               border: Border.all(color: Colors.red.withOpacity(0.3), width: 1),
             ),
             child: InkWell(
-              onTap: () => _logout(context),
+              onTap: () => SaidaHelper.logout(context), // Mudança aqui
               borderRadius: BorderRadius.circular(16),
               child: Row(
                 children: [

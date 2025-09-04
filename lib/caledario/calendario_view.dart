@@ -729,36 +729,79 @@ class _CalendarioAgendamentosPageState extends State<CalendarioAgendamentosPage>
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+
+    final isDarkMode = theme.brightness == Brightness.dark;
+    final primaryColor = isDarkMode
+        ? Colors.indigoAccent[700]
+        : Colors.indigo[700];
+    final backgroundColor = isDarkMode
+        ? Color(0xFF1E1E28)
+        : const Color.fromARGB(255, 206, 205, 205);
     return Scaffold(
-      backgroundColor: theme.brightness == Brightness.dark
-          ? const Color(0xFF121212)
-          : const Color(0xFFF5F5F7),
+      backgroundColor: backgroundColor,
+
       appBar: AppBar(
-        title: Text(
-          'Agenda',
-          style: GoogleFonts.poppins(fontWeight: FontWeight.bold),
+        backgroundColor: primaryColor,
+        automaticallyImplyLeading: false, // Remove a seta de voltar automática
+        title: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(Icons.calendar_today, color: Colors.white, size: 28),
+            SizedBox(width: 10),
+            Text.rich(
+              TextSpan(
+                children: [
+                  TextSpan(
+                    text: 'Minha ',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w600,
+                      fontSize: 22,
+                      color: Colors.white,
+                    ),
+                  ),
+                  TextSpan(
+                    text: 'Agenda',
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 22,
+                      color: Colors.greenAccent,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
-        backgroundColor: theme.brightness == Brightness.dark
-            ? const Color(0xFF1E1E2E)
-            : Colors.white,
+
         elevation: 0,
         actions: [
           IconButton(
-            icon: const Icon(Icons.filter_list),
+            icon: const Icon(Icons.filter_list, color: Colors.white),
             onPressed: _showFilters,
           ),
-          IconButton(icon: const Icon(Icons.add), onPressed: _onCreate),
+          IconButton(
+            icon: const Icon(Icons.add, color: Colors.white),
+            onPressed: _onCreate,
+          ),
         ],
         bottom: TabBar(
+          labelColor: Colors.white, // Cor do texto da tab selecionada
+          unselectedLabelColor:
+              Colors.white70, // Cor do texto da tab não selecionada
+          indicatorColor:
+              Colors.greenAccent, // Cor do indicador da tab selecionada
+          indicatorWeight: 3.0, // Espessura do indicador
+          labelStyle: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+          unselectedLabelStyle: TextStyle(
+            fontWeight: FontWeight.normal,
+            fontSize: 16,
+          ),
           controller: _tabController,
           tabs: const [
             Tab(text: 'Agenda'),
             Tab(text: 'Dia'),
             Tab(text: 'Semana'),
           ],
-          labelStyle: GoogleFonts.poppins(fontWeight: FontWeight.w600),
-          indicatorColor: theme.primaryColor,
-          indicatorWeight: 3,
         ),
       ),
       body: TabBarView(
@@ -867,7 +910,14 @@ class _CalendarioAgendamentosPageState extends State<CalendarioAgendamentosPage>
                                 Icon(
                                   _getStatusIcon(s),
                                   size: 16,
-                                  color: isSel ? color : Colors.grey,
+                                  color: isSel
+                                      ? color
+                                      : const Color.fromARGB(
+                                          255,
+                                          148,
+                                          147,
+                                          147,
+                                        ),
                                 ),
                               if (s != 'Todos') const SizedBox(width: 4),
                               Text(
