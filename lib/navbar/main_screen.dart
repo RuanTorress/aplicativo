@@ -1,9 +1,9 @@
 import 'package:altgest/caledario/calendario_view.dart';
 import 'package:altgest/home_inicio/home.dart';
 import 'package:altgest/navbar/saida.dart';
+import 'package:altgest/servico/taps.dart';
 import 'package:flutter/material.dart';
 import 'package:altgest/caixa/caixa.dart';
-import 'package:altgest/procedimentos/taps.dart';
 import 'package:altgest/estoque/estoque.dart';
 import 'package:altgest/notas/notas_page.dart';
 import 'package:altgest/rotina_diarias.dart/rotina_page.dart';
