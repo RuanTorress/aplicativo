@@ -35,17 +35,13 @@ class _MainScreenState extends State<MainScreen>
   ];
 
   final List<Map<String, dynamic>> _menuItems = [
-    {'icon': Icons.dashboard_rounded, 'title': 'Dashboard', 'index': 0},
+    {'icon': Icons.dashboard_rounded, 'title': 'Inicio', 'index': 0},
     {
       'icon': Icons.account_balance_wallet_rounded,
       'title': 'Caixa',
       'index': 1,
     },
-    {
-      'icon': Icons.medical_services_rounded,
-      'title': 'Procedimentos',
-      'index': 2,
-    },
+    {'icon': Icons.medical_services_rounded, 'title': 'Serviços', 'index': 2},
     {'icon': Icons.inventory_2_rounded, 'title': 'Estoque', 'index': 3},
     {'icon': Icons.description_rounded, 'title': 'Notas', 'index': 4},
     {'icon': Icons.event_note_rounded, 'title': 'Rotinas', 'index': 5},
@@ -429,13 +425,13 @@ class _MainScreenState extends State<MainScreen>
 
     switch (_currentIndex) {
       case 0:
-        pageTitle = 'Dashboard';
+        pageTitle = 'Inicio';
         break;
       case 1:
         pageTitle = 'Caixa';
         break;
       case 2:
-        pageTitle = 'Procedimentos';
+        pageTitle = 'Serviços';
         break;
       case 3:
         pageTitle = 'Estoque';
