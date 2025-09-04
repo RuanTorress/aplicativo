@@ -47,56 +47,80 @@ Future<bool> showAgendamentoForm(
       return StatefulBuilder(
         builder: (context, setState) {
           return Dialog(
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+            insetPadding: const EdgeInsets.symmetric(
+              horizontal: 20,
+              vertical: 24,
             ),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
+            ),
+            elevation: 8,
             child: Container(
-              padding: const EdgeInsets.all(20),
+              padding: const EdgeInsets.all(24),
               constraints: const BoxConstraints(maxWidth: 500, maxHeight: 700),
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(24),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Colors.white, Colors.blue.shade50],
+                ),
+              ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Text(
-                    agendamento == null
-                        ? 'Novo Agendamento'
-                        : 'Editar Agendamento',
-                    style: GoogleFonts.poppins(
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                  Container(
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        bottom: BorderSide(
+                          color: Colors.blue.shade100,
+                          width: 2,
+                        ),
+                      ),
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Icon(
+                          agendamento == null ? Icons.add_circle : Icons.edit,
+                          color: Colors.blue.shade700,
+                          size: 28,
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          agendamento == null
+                              ? 'Novo Agendamento'
+                              : 'Editar Agendamento',
+                          style: GoogleFonts.poppins(
+                            fontSize: 22,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.blue.shade800,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                   Expanded(
                     child: ListView(
                       children: [
-                        TextField(
+                        _buildFormField(
                           controller: _tituloController,
-                          decoration: InputDecoration(
-                            labelText: 'Título do Serviço *',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          label: 'Título do Serviço *',
+                          icon: Icons.work,
                         ),
                         const SizedBox(height: 16),
-                        TextField(
+                        _buildFormField(
                           controller: _clienteController,
-                          decoration: InputDecoration(
-                            labelText: 'Nome do Cliente *',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          label: 'Nome do Cliente *',
+                          icon: Icons.person,
                         ),
                         const SizedBox(height: 16),
-                        TextField(
+                        _buildFormField(
                           controller: _profissionalController,
-                          decoration: InputDecoration(
-                            labelText: 'Profissional *',
-                            border: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                            ),
-                          ),
+                          label: 'Profissional *',
+                          icon: Icons.badge,
                         ),
                         const SizedBox(height: 16),
                         InkWell(
@@ -110,6 +134,19 @@ Future<bool> showAgendamentoForm(
                               lastDate: DateTime.now().add(
                                 const Duration(days: 365),
                               ),
+                              builder: (context, child) {
+                                return Theme(
+                                  data: Theme.of(context).copyWith(
+                                    colorScheme: ColorScheme.light(
+                                      primary: Colors.blue.shade600,
+                                      onPrimary: Colors.white,
+                                      surface: Colors.white,
+                                      onSurface: Colors.black87,
+                                    ),
+                                  ),
+                                  child: child!,
+                                );
+                              },
                             );
                             if (picked != null) setState(() => dataAg = picked);
                           },
@@ -119,7 +156,19 @@ Future<bool> showAgendamentoForm(
                               border: OutlineInputBorder(
                                 borderRadius: BorderRadius.circular(12),
                               ),
-                              suffixIcon: const Icon(Icons.calendar_today),
+                              prefixIcon: Icon(
+                                Icons.calendar_today,
+                                color: Colors.blue.shade600,
+                              ),
+                              filled: true,
+                              fillColor: Colors.white,
+                              focusedBorder: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                borderSide: BorderSide(
+                                  color: Colors.blue.shade400,
+                                  width: 2,
+                                ),
+                              ),
                             ),
                             child: Text(
                               DateFormat('dd/MM/yyyy').format(dataAg),
@@ -136,6 +185,16 @@ Future<bool> showAgendamentoForm(
                                   final picked = await showTimePicker(
                                     context: context,
                                     initialTime: horaInicio,
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: Theme.of(context).copyWith(
+                                          colorScheme: ColorScheme.light(
+                                            primary: Colors.blue.shade600,
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
                                   );
                                   if (picked != null)
                                     setState(() => horaInicio = picked);
@@ -146,10 +205,23 @@ Future<bool> showAgendamentoForm(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    suffixIcon: const Icon(Icons.access_time),
+                                    prefixIcon: Icon(
+                                      Icons.access_time,
+                                      color: Colors.blue.shade600,
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue.shade400,
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                   child: Text(
                                     '${horaInicio.hour.toString().padLeft(2, '0')}:${horaInicio.minute.toString().padLeft(2, '0')}',
+                                    style: GoogleFonts.poppins(),
                                   ),
                                 ),
                               ),
@@ -161,6 +233,16 @@ Future<bool> showAgendamentoForm(
                                   final picked = await showTimePicker(
                                     context: context,
                                     initialTime: horaFim,
+                                    builder: (context, child) {
+                                      return Theme(
+                                        data: Theme.of(context).copyWith(
+                                          colorScheme: ColorScheme.light(
+                                            primary: Colors.blue.shade600,
+                                          ),
+                                        ),
+                                        child: child!,
+                                      );
+                                    },
                                   );
                                   if (picked != null)
                                     setState(() => horaFim = picked);
@@ -171,10 +253,23 @@ Future<bool> showAgendamentoForm(
                                     border: OutlineInputBorder(
                                       borderRadius: BorderRadius.circular(12),
                                     ),
-                                    suffixIcon: const Icon(Icons.access_time),
+                                    prefixIcon: Icon(
+                                      Icons.access_time,
+                                      color: Colors.blue.shade600,
+                                    ),
+                                    filled: true,
+                                    fillColor: Colors.white,
+                                    focusedBorder: OutlineInputBorder(
+                                      borderRadius: BorderRadius.circular(12),
+                                      borderSide: BorderSide(
+                                        color: Colors.blue.shade400,
+                                        width: 2,
+                                      ),
+                                    ),
                                   ),
                                   child: Text(
                                     '${horaFim.hour.toString().padLeft(2, '0')}:${horaFim.minute.toString().padLeft(2, '0')}',
+                                    style: GoogleFonts.poppins(),
                                   ),
                                 ),
                               ),
@@ -183,12 +278,29 @@ Future<bool> showAgendamentoForm(
                         ),
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
-                          value: status,
+                          initialValue: status,
                           decoration: InputDecoration(
                             labelText: 'Status',
                             border: OutlineInputBorder(
                               borderRadius: BorderRadius.circular(12),
                             ),
+                            prefixIcon: Icon(
+                              Icons.check_circle_outline,
+                              color: Colors.blue.shade600,
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.blue.shade400,
+                                width: 2,
+                              ),
+                            ),
+                          ),
+                          icon: Icon(
+                            Icons.arrow_drop_down,
+                            color: Colors.blue.shade700,
                           ),
                           items:
                               [
@@ -200,7 +312,10 @@ Future<bool> showAgendamentoForm(
                                   .map(
                                     (s) => DropdownMenuItem(
                                       value: s,
-                                      child: Text(s),
+                                      child: Text(
+                                        s,
+                                        style: GoogleFonts.poppins(),
+                                      ),
                                     ),
                                   )
                                   .toList(),
@@ -217,88 +332,151 @@ Future<bool> showAgendamentoForm(
                               borderRadius: BorderRadius.circular(12),
                             ),
                             alignLabelWithHint: true,
+                            prefixIcon: Padding(
+                              padding: const EdgeInsets.only(bottom: 52),
+                              child: Icon(
+                                Icons.note,
+                                color: Colors.blue.shade600,
+                              ),
+                            ),
+                            filled: true,
+                            fillColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderRadius: BorderRadius.circular(12),
+                              borderSide: BorderSide(
+                                color: Colors.blue.shade400,
+                                width: 2,
+                              ),
+                            ),
                           ),
                         ),
                       ],
                     ),
                   ),
                   const SizedBox(height: 20),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.end,
-                    children: [
-                      TextButton(
-                        onPressed: () => Navigator.of(context).pop(false),
-                        child: const Text('Cancelar'),
+                  Container(
+                    padding: const EdgeInsets.only(top: 16),
+                    decoration: BoxDecoration(
+                      border: Border(
+                        top: BorderSide(color: Colors.blue.shade100, width: 1),
                       ),
-                      const SizedBox(width: 16),
-                      ElevatedButton(
-                        onPressed: () async {
-                          if (_tituloController.text.isEmpty ||
-                              _clienteController.text.isEmpty ||
-                              _profissionalController.text.isEmpty) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'Preencha todos os campos obrigatórios',
+                    ),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(false),
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.grey.shade700,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 20,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Text(
+                            'Cancelar',
+                            style: GoogleFonts.poppins(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 16),
+                        ElevatedButton(
+                          onPressed: () async {
+                            if (_tituloController.text.isEmpty ||
+                                _clienteController.text.isEmpty ||
+                                _profissionalController.text.isEmpty) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'Preencha todos os campos obrigatórios',
+                                  ),
+                                  backgroundColor: Colors.red,
                                 ),
-                                backgroundColor: Colors.red,
-                              ),
+                              );
+                              return;
+                            }
+
+                            final horarioInicio = DateTime(
+                              dataAg.year,
+                              dataAg.month,
+                              dataAg.day,
+                              horaInicio.hour,
+                              horaInicio.minute,
                             );
-                            return;
-                          }
+                            final horarioFim = DateTime(
+                              dataAg.year,
+                              dataAg.month,
+                              dataAg.day,
+                              horaFim.hour,
+                              horaFim.minute,
+                            );
 
-                          final horarioInicio = DateTime(
-                            dataAg.year,
-                            dataAg.month,
-                            dataAg.day,
-                            horaInicio.hour,
-                            horaInicio.minute,
-                          );
-                          final horarioFim = DateTime(
-                            dataAg.year,
-                            dataAg.month,
-                            dataAg.day,
-                            horaFim.hour,
-                            horaFim.minute,
-                          );
-
-                          if (!horarioFim.isAfter(horarioInicio)) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text(
-                                  'O horário de término deve ser posterior ao início',
+                            if (!horarioFim.isAfter(horarioInicio)) {
+                              ScaffoldMessenger.of(context).showSnackBar(
+                                const SnackBar(
+                                  content: Text(
+                                    'O horário de término deve ser posterior ao início',
+                                  ),
+                                  backgroundColor: Colors.red,
                                 ),
-                                backgroundColor: Colors.red,
+                              );
+                              return;
+                            }
+
+                            final payload = {
+                              'titulo': _tituloController.text,
+                              'cliente': _clienteController.text,
+                              'profissional': _profissionalController.text,
+                              'horario': horarioInicio.toIso8601String(),
+                              'fim': horarioFim.toIso8601String(),
+                              'status': status,
+                              'observacao': _observacaoController.text.isEmpty
+                                  ? null
+                                  : _observacaoController.text,
+                              'dataCriacao': DateTime.now().toIso8601String(),
+                            };
+
+                            if (id != null) {
+                              await box.put(id, payload);
+                            } else {
+                              final newId = uuid.v4();
+                              await box.put(newId, payload);
+                            }
+
+                            Navigator.of(context).pop(true);
+                          },
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: Colors.blue.shade600,
+                            foregroundColor: Colors.white,
+                            elevation: 2,
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 24,
+                              vertical: 12,
+                            ),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(8),
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.save, size: 18),
+                              const SizedBox(width: 8),
+                              Text(
+                                'Salvar',
+                                style: GoogleFonts.poppins(
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
-                            );
-                            return;
-                          }
-
-                          final payload = {
-                            'titulo': _tituloController.text,
-                            'cliente': _clienteController.text,
-                            'profissional': _profissionalController.text,
-                            'horario': horarioInicio.toIso8601String(),
-                            'fim': horarioFim.toIso8601String(),
-                            'status': status,
-                            'observacao': _observacaoController.text.isEmpty
-                                ? null
-                                : _observacaoController.text,
-                            'dataCriacao': DateTime.now().toIso8601String(),
-                          };
-
-                          if (id != null) {
-                            await box.put(id, payload);
-                          } else {
-                            final newId = uuid.v4();
-                            await box.put(newId, payload);
-                          }
-
-                          Navigator.of(context).pop(true);
-                        },
-                        child: const Text('Salvar'),
-                      ),
-                    ],
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -308,4 +486,27 @@ Future<bool> showAgendamentoForm(
       );
     },
   ).then((v) => v ?? false);
+}
+
+// Add this helper method at the end of the file
+Widget _buildFormField({
+  required TextEditingController controller,
+  required String label,
+  required IconData icon,
+}) {
+  return TextField(
+    controller: controller,
+    decoration: InputDecoration(
+      labelText: label,
+      border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+      prefixIcon: Icon(icon, color: Colors.blue.shade600),
+      filled: true,
+      fillColor: Colors.white,
+      focusedBorder: OutlineInputBorder(
+        borderRadius: BorderRadius.circular(12),
+        borderSide: BorderSide(color: Colors.blue.shade400, width: 2),
+      ),
+    ),
+    style: GoogleFonts.poppins(),
+  );
 }

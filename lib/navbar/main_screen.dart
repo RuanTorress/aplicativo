@@ -1,10 +1,11 @@
 import 'package:altgest/caledario/calendario_view.dart';
+import 'package:altgest/home_inicio/home.dart';
 import 'package:flutter/material.dart';
 import 'package:altgest/homepage/home_page.dart';
 import 'package:altgest/caixa/caixa.dart';
 import 'package:altgest/procedimentos/taps.dart';
 import 'package:altgest/estoque/estoque.dart';
-import 'package:altgest/notas/notas.dart';
+import 'package:altgest/notas/notas_page.dart';
 import 'package:altgest/rotina_diarias.dart/rotina_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';

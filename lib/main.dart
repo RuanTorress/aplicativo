@@ -1,11 +1,12 @@
 import 'package:altgest/navbar/main_screen.dart';
 import 'package:altgest/estoque/estoque.dart';
-import 'package:altgest/notas/notas.dart';
+import 'package:altgest/notas/nota_model.dart';
 import 'package:altgest/rotina_diarias.dart/rotina_page.dart';
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 import 'package:hive_flutter/hive_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:flutter_localizations/flutter_localizations.dart';
 
 import 'firebase_options.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -39,7 +40,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Novo aplicativo teste',
+      title: 'altGest | Gestão do dia  ',
       theme: ThemeData(primarySwatch: Colors.blue, useMaterial3: true),
       debugShowCheckedModeBanner: false, // esta linha remove o banner de debug
       routes: {
@@ -59,6 +60,14 @@ class MyApp extends StatelessWidget {
           }
         },
       ),
+      localizationsDelegates: const [
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+        // Se usar table_calendar >= 3.0.0:
+        // TableCalendarLocalizations.delegate,
+      ],
+      supportedLocales: const [Locale('pt', 'BR')],
     );
   }
 }

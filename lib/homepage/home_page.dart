@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+/* import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
 
 class HomePage extends StatefulWidget {
@@ -11,7 +11,7 @@ class _HomePageState extends State<HomePage> {
   final TextEditingController _nomeController = TextEditingController();
   final TextEditingController _valorController = TextEditingController();
   List<Map<String, dynamic>> _items = [];
-
+/*  */
   @override
   void initState() {
     super.initState();
@@ -132,3 +132,4 @@ class _HomePageState extends State<HomePage> {
     );
   }
 }
+ */

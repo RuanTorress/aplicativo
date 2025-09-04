@@ -76,7 +76,7 @@ class WeekViewMobile extends StatelessWidget {
               ),
               const Spacer(),
               Text(
-                '${DateFormat('dd MMM yyyy').format(days.isNotEmpty ? days.first : DateTime.now())}',
+                '${DateFormat('dd MMM yyyy', 'pt_BR').format(days.isNotEmpty ? days.first : DateTime.now())}',
                 style: GoogleFonts.poppins(
                   fontSize: 13,
                   color: Colors.grey[600],
@@ -140,7 +140,10 @@ class WeekViewMobile extends StatelessWidget {
                             child: Column(
                               children: [
                                 Text(
-                                  DateFormat('EEE').format(d), // Mon, Tue...
+                                  DateFormat(
+                                    'EEE',
+                                    'pt_BR',
+                                  ).format(d), // Dia da semana em português
                                   style: GoogleFonts.poppins(
                                     fontSize: 12,
                                     fontWeight: FontWeight.w600,
@@ -159,7 +162,10 @@ class WeekViewMobile extends StatelessWidget {
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
-                              DateFormat('MMM').format(d),
+                              DateFormat(
+                                'MMM',
+                                'pt_BR',
+                              ).format(d), // Mês em português
                               style: GoogleFonts.poppins(
                                 fontSize: 12,
                                 color: Colors.grey[600],

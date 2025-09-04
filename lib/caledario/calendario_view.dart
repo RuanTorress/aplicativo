@@ -184,6 +184,7 @@ class _CalendarioAgendamentosPageState extends State<CalendarioAgendamentosPage>
         ],
       ),
       child: TableCalendar(
+        locale: 'pt_BR',
         firstDay: DateTime.utc(2023, 1, 1),
         lastDay: DateTime.utc(2030, 12, 31),
         focusedDay: _focusedDay,
@@ -514,7 +515,7 @@ class _CalendarioAgendamentosPageState extends State<CalendarioAgendamentosPage>
     return Icons.event;
   }
 
-  // --- WEEK VIEW: mostra 7 dias com resumo e evento dentro de cada dia ---
+  /*   // --- WEEK VIEW: mostra 7 dias com resumo e evento dentro de cada dia ---
   Widget _buildWeekView(BuildContext context) {
     final weekMap = _getEventsForWeek(_focusedDay);
     final days = weekMap.keys.toList()..sort();
@@ -609,14 +610,14 @@ class _CalendarioAgendamentosPageState extends State<CalendarioAgendamentosPage>
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              DateFormat('EEE').format(d),
+                              DateFormat('EEE', 'pt_BR').format(d), // Dia da semana em português
                               style: GoogleFonts.poppins(
                                 fontWeight: FontWeight.w600,
                               ),
                             ),
                             const SizedBox(height: 6),
                             Text(
-                              DateFormat('dd/MM').format(d),
+                              DateFormat('MMM', 'pt_BR').format(d), // Mês em português
                               style: GoogleFonts.poppins(
                                 color: Colors.grey[600],
                               ),
@@ -691,7 +692,7 @@ class _CalendarioAgendamentosPageState extends State<CalendarioAgendamentosPage>
         ),
       ],
     );
-  }
+  } */
 
   // reutilitários e builds principais
 
