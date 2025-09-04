@@ -49,6 +49,7 @@ class _LoginPageState extends State<LoginPage> {
             end: Alignment.bottomRight,
           ),
         ),
+
         child: SafeArea(
           child: Center(
             child: SingleChildScrollView(

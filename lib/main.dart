@@ -46,6 +46,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/main': (context) => MainScreen(),
         '/rotinas': (context) => RotinasPage(),
+        '/login': (context) => LoginPage(), // Adicione esta linha
       },
       home: StreamBuilder<User?>(
         stream: FirebaseAuth.instance.authStateChanges(),
