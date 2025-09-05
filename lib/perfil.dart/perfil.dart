@@ -213,30 +213,6 @@ class _PerfilPageState extends State<PerfilPage> with TickerProviderStateMixin {
     setState(() => _isLoading = false);
   }
 
-  Future<void> _pickImage() async {
-    if (kIsWeb) {
-      // Para web, mostre uma mensagem ou desabilite
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Upload de foto não disponível no navegador. Use o app mobile.',
-          ),
-        ),
-      );
-      return;
-    }
-    try {
-      final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
-      if (pickedFile != null) {
-        setState(() => _profileImage = File(pickedFile.path));
-      }
-    } catch (e) {
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text('Erro ao selecionar imagem: $e')));
-    }
-  }
-
   Future<void> _selectIcon() async {
     final selected = await showDialog<IconData>(
       context: context,

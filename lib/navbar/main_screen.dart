@@ -8,7 +8,6 @@ import 'package:altgest/caixa/caixa.dart';
 import 'package:altgest/estoque/estoque.dart';
 import 'package:altgest/notas/notas_page.dart';
 import 'package:altgest/rotina_diarias.dart/rotina_page.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:altgest/perfil.dart/perfil.dart';
 
