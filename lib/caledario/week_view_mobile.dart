@@ -13,12 +13,12 @@ class WeekViewMobile extends StatelessWidget {
   final ShowDetail onShowDetail;
 
   const WeekViewMobile({
-    Key? key,
+    super.key,
     required this.weekMap,
     required this.selectedDay,
     required this.onDayTap,
     required this.onShowDetail,
-  }) : super(key: key);
+  });
 
   List<DateTime> _sortedDays() {
     final days = weekMap.keys.toList();
@@ -39,18 +39,6 @@ class WeekViewMobile extends StatelessWidget {
       default:
         return Colors.grey;
     }
-  }
-
-  IconData _smallIconForTitle(String title) {
-    final t = title.toLowerCase();
-    if (t.contains('cabelo')) return Icons.content_cut;
-    if (t.contains('manicure')) return Icons.clean_hands;
-    if (t.contains('massagem')) return Icons.spa;
-    if (t.contains('pele')) return Icons.face;
-    if (t.contains('sobrancelha')) return Icons.face_retouching_natural;
-    if (t.contains('depilação')) return Icons.waves;
-    if (t.contains('hidratação')) return Icons.water_drop;
-    return Icons.event;
   }
 
   @override
