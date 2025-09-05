@@ -25,7 +25,11 @@ class _CaixaPageState extends State<CaixaPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 3, vsync: this);
+    _tabController = TabController(
+      length: 3,
+      vsync: this,
+      initialIndex: 2,
+    ); // Inicia em 'Mensal' (índice 2)
     _tabController.addListener(() {
       if (!_tabController.indexIsChanging) {
         setState(() {
@@ -129,6 +133,13 @@ class _CaixaPageState extends State<CaixaPage>
       final value = lancamento['value'] as Map<String, dynamic>;
       saldo += value['valor'] as double;
     }
+
+    // Ordena os lançamentos filtrados pela data (mais recentes primeiro)
+    lancamentosFiltrados.sort(
+      (a, b) => DateTime.parse(
+        b['value']['data'],
+      ).compareTo(DateTime.parse(a['value']['data'])),
+    );
 
     setState(() {
       _lancamentos = lancamentosFiltrados;

@@ -1,5 +1,6 @@
 import 'package:altgest/caledario/calendario_view.dart';
 import 'package:altgest/home_inicio/home.dart';
+import 'package:altgest/navbar/alertas.dart';
 import 'package:altgest/navbar/saida.dart';
 import 'package:altgest/servico/taps.dart';
 import 'package:flutter/material.dart';
@@ -108,9 +109,7 @@ class _MainScreenState extends State<MainScreen>
         actions: [
           IconButton(
             icon: Icon(Icons.notifications_outlined),
-            onPressed: () {
-              // Ação de notificações
-            },
+            onPressed: () => AlertasPage.openAlertas(context),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 8.0),
