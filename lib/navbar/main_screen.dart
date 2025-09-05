@@ -10,6 +10,7 @@ import 'package:altgest/notas/notas_page.dart';
 import 'package:altgest/rotina_diarias.dart/rotina_page.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:altgest/perfil.dart/perfil.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -111,15 +112,24 @@ class _MainScreenState extends State<MainScreen>
             icon: Icon(Icons.notifications_outlined),
             onPressed: () => AlertasPage.openAlertas(context),
           ),
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            child: CircleAvatar(
-              radius: 16,
-              backgroundColor: primaryColor?.withOpacity(0.2),
-              child: Icon(
-                Icons.person_outline_rounded,
-                size: 20,
-                color: primaryColor,
+          GestureDetector(
+            // Envolve o Padding para torná-lo clicável
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(builder: (context) => PerfilPage()),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 8.0),
+              child: CircleAvatar(
+                radius: 16,
+                backgroundColor: primaryColor?.withOpacity(0.2),
+                child: Icon(
+                  Icons.person_outline_rounded,
+                  size: 20,
+                  color: primaryColor,
+                ),
               ),
             ),
           ),

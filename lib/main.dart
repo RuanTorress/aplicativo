@@ -32,6 +32,7 @@ void main() async {
   await Hive.openBox<Nota>('notas');
   await Hive.openBox('rotinas');
   await Hive.openBox('agendamentos');
+  await Hive.openBox('userData');
 
   runApp(MyApp());
 }
