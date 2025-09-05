@@ -21,6 +21,7 @@ class _AlertasPageState extends State<AlertasPage>
 
   List<Map<String, dynamic>> _alertasAgendamentos = [];
   List<Map<String, dynamic>> _alertasRotinas = [];
+  bool _isLoading = false;
 
   @override
   void initState() {
@@ -28,7 +29,11 @@ class _AlertasPageState extends State<AlertasPage>
     _carregarAlertas();
   }
 
-  void _carregarAlertas() {
+  Future<void> _carregarAlertas() async {
+    setState(() => _isLoading = true);
+    await Future.delayed(
+      Duration(milliseconds: 500),
+    ); // Simular loading para UX
     final hoje = DateTime.now();
     final hojeFormatado = DateFormat('yyyy-MM-dd').format(hoje);
 
@@ -72,18 +77,22 @@ class _AlertasPageState extends State<AlertasPage>
         .cast<Map<String, dynamic>>()
         .toList();
 
-    setState(() {});
+    setState(() => _isLoading = false);
   }
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final isDarkMode = theme.brightness == Brightness.dark;
-    final backgroundColor = isDarkMode ? Color(0xFF1E1E28) : Colors.grey[50];
-    final cardColor = isDarkMode ? Color(0xFF2D2D3A) : Colors.white;
     final primaryColor = isDarkMode
-        ? Colors.indigoAccent[700]
-        : Colors.indigo[700];
+        ? Colors
+              .indigoAccent
+              .shade700 // Corrigido: shade700 em vez de [700]
+        : Colors.indigo.shade700; // Corrigido: shade700 em vez de [700]
+    final backgroundColor = isDarkMode
+        ? Color(0xFF1E1E28)
+        : Colors.grey.shade50; // Corrigido: shade50 em vez de [50]
+    final cardColor = theme.cardColor;
     final accentColor = Colors.orangeAccent;
 
     final totalAlertas = _alertasAgendamentos.length + _alertasRotinas.length;
@@ -93,119 +102,152 @@ class _AlertasPageState extends State<AlertasPage>
       appBar: AppBar(
         title: Row(
           children: [
-            Icon(Icons.notifications_active, color: Colors.white),
+            Icon(
+              Icons.notifications_active,
+              color: theme.appBarTheme.foregroundColor,
+            ),
             SizedBox(width: 8),
-            Text('Alertas do Dia'),
+            Text('Alertas do Dia', style: theme.appBarTheme.titleTextStyle),
           ],
         ),
-        backgroundColor: primaryColor,
-        elevation: 0,
+        backgroundColor:
+            primaryColor, // Atualizado para usar primaryColor customizado
+        elevation: 2,
+        shadowColor: theme.shadowColor,
       ),
-      body: RefreshIndicator(
-        onRefresh: () async => _carregarAlertas(),
-        child: totalAlertas == 0
-            ? _buildEmptyState()
-            : ListView(
-                padding: EdgeInsets.all(16),
-                children: [
-                  // Cabeçalho informativo
-                  Container(
-                    padding: EdgeInsets.all(16),
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        colors: [?primaryColor, accentColor],
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
+      body: _isLoading
+          ? Center(child: CircularProgressIndicator(color: primaryColor))
+          : RefreshIndicator(
+              onRefresh: _carregarAlertas,
+              child: totalAlertas == 0
+                  ? _buildEmptyState(theme, backgroundColor)
+                  : ListView(
+                      padding: EdgeInsets.symmetric(
+                        horizontal: 16,
+                        vertical: 8,
                       ),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Column(
                       children: [
-                        Icon(Icons.info_outline, color: Colors.white, size: 40),
-                        SizedBox(height: 8),
-                        Text(
-                          'Acesse suas telas de agendamentos e rotinas para mais detalhes!',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 16,
-                            fontWeight: FontWeight.w500,
+                        // Cabeçalho informativo
+                        Container(
+                          padding: EdgeInsets.all(20),
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              colors: [primaryColor, accentColor],
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                            ),
+                            borderRadius: BorderRadius.circular(16),
+                            boxShadow: [
+                              BoxShadow(
+                                color: primaryColor.withOpacity(0.3),
+                                blurRadius: 10,
+                                offset: Offset(0, 4),
+                              ),
+                            ],
                           ),
-                          textAlign: TextAlign.center,
+                          child: Column(
+                            children: [
+                              Icon(
+                                Icons.info_outline,
+                                color: Colors.white,
+                                size: 48,
+                              ),
+                              SizedBox(height: 12),
+                              Text(
+                                'Aqui estão seus alertas do dia. Mantenha-se organizado!',
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w500,
+                                  height: 1.4,
+                                ),
+                                textAlign: TextAlign.center,
+                              ),
+                            ],
+                          ),
                         ),
-                        SizedBox(height: 12),
+                        SizedBox(height: 24),
+                        // Seções de alertas
+                        if (_alertasAgendamentos.isNotEmpty) ...[
+                          _buildSectionHeader(
+                            'Agendamentos',
+                            _alertasAgendamentos.length,
+                            Icons.event,
+                            primaryColor, // Atualizado
+                          ),
+                          ..._alertasAgendamentos.map(
+                            (ag) => _buildAlertaCard(
+                              context: context,
+                              titulo: ag['titulo'] ?? '',
+                              subtitulo:
+                                  'Cliente: ${ag['cliente'] ?? ''} • ${DateFormat('HH:mm').format(DateTime.parse(ag['horario']))}',
+                              icone: Icons.event,
+                              cor: primaryColor, // Atualizado
+                              cardColor: cardColor,
+                              isNearTime: _isNearTime(
+                                DateTime.parse(ag['horario']),
+                              ),
+                            ),
+                          ),
+                          SizedBox(height: 20),
+                        ],
+                        if (_alertasRotinas.isNotEmpty) ...[
+                          _buildSectionHeader(
+                            'Rotinas',
+                            _alertasRotinas.length,
+                            Icons.schedule,
+                            accentColor, // Atualizado para accentColor
+                          ),
+                          ..._alertasRotinas.map(
+                            (rotina) => _buildAlertaCard(
+                              context: context,
+                              titulo: rotina['titulo'] ?? '',
+                              subtitulo:
+                                  'Categoria: ${rotina['categoria'] ?? ''} • Prioridade: ${rotina['prioridade'] ?? ''}',
+                              icone: Icons.schedule,
+                              cor: accentColor, // Atualizado
+                              cardColor: cardColor,
+                              isNearTime: false,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
-                  ),
-                  SizedBox(height: 20),
-                  // Seções de alertas
-                  if (_alertasAgendamentos.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      'Agendamentos',
-                      _alertasAgendamentos.length,
-                      Icons.event,
-                      Colors.blue,
-                    ),
-                    ..._alertasAgendamentos.map(
-                      (ag) => _buildAlertaCard(
-                        titulo: ag['titulo'] ?? '',
-                        subtitulo:
-                            'Cliente: ${ag['cliente'] ?? ''} • ${DateFormat('HH:mm').format(DateTime.parse(ag['horario']))}',
-                        icone: Icons.event,
-                        cor: Colors.blue,
-                        cardColor: cardColor,
-                        isNearTime: _isNearTime(DateTime.parse(ag['horario'])),
-                      ),
-                    ),
-                    SizedBox(height: 16),
-                  ],
-                  if (_alertasRotinas.isNotEmpty) ...[
-                    _buildSectionHeader(
-                      'Rotinas',
-                      _alertasRotinas.length,
-                      Icons.schedule,
-                      Colors.green,
-                    ),
-                    ..._alertasRotinas.map(
-                      (rotina) => _buildAlertaCard(
-                        titulo: rotina['titulo'] ?? '',
-                        subtitulo:
-                            'Categoria: ${rotina['categoria'] ?? ''} • Prioridade: ${rotina['prioridade'] ?? ''}',
-                        icone: Icons.schedule,
-                        cor: Colors.green,
-                        cardColor: cardColor,
-                        isNearTime:
-                            false, // Rotinas não têm horário exato, ajuste se necessário
-                      ),
-                    ),
-                  ],
-                ],
-              ),
-      ),
+            ),
     );
   }
 
-  Widget _buildEmptyState() {
-    return Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.notifications_none, size: 100, color: Colors.grey[400]),
-          SizedBox(height: 16),
-          Text(
-            'Nenhum alerta para hoje!',
-            style: TextStyle(
-              fontSize: 22,
-              color: Colors.grey[600],
-              fontWeight: FontWeight.bold,
+  Widget _buildEmptyState(ThemeData theme, Color backgroundColor) {
+    return Container(
+      color:
+          backgroundColor, // Atualizado para usar backgroundColor customizado
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              Icons.notifications_none,
+              size: 120,
+              color: theme.disabledColor,
             ),
-          ),
-          SizedBox(height: 8),
-          Text(
-            'Você está em dia com seus compromissos.',
-            textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[500], fontSize: 16),
-          ),
-        ],
+            SizedBox(height: 20),
+            Text(
+              'Nenhum alerta para hoje!',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                color: theme.textTheme.bodyLarge?.color,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 12),
+            Text(
+              'Você está em dia com seus compromissos.',
+              textAlign: TextAlign.center,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.hintColor,
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -216,23 +258,27 @@ class _AlertasPageState extends State<AlertasPage>
     IconData icon,
     Color color,
   ) {
-    return Row(
-      children: [
-        Icon(icon, color: color, size: 28),
-        SizedBox(width: 8),
-        Text(
-          '$title ($count)',
-          style: TextStyle(
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: color,
+    return Padding(
+      padding: EdgeInsets.only(bottom: 12),
+      child: Row(
+        children: [
+          Icon(icon, color: color, size: 32),
+          SizedBox(width: 12),
+          Text(
+            '$title ($count)',
+            style: TextStyle(
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+              color: color,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
   Widget _buildAlertaCard({
+    required BuildContext context,
     required String titulo,
     required String subtitulo,
     required IconData icone,
@@ -242,37 +288,70 @@ class _AlertasPageState extends State<AlertasPage>
   }) {
     return Card(
       color: cardColor,
-      elevation: 6,
-      margin: EdgeInsets.only(bottom: 12),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-      child: ListTile(
-        leading: CircleAvatar(
-          backgroundColor: cor.withOpacity(0.2),
-          child: Icon(icone, color: cor, size: 30),
-        ),
-        title: isNearTime
-            ? BlinkingText(
-                text: titulo,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
-              )
-            : Text(
-                titulo,
-                style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18),
+      elevation: 8,
+      margin: EdgeInsets.only(bottom: 16),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shadowColor: cor.withOpacity(0.2),
+      child: Padding(
+        padding: EdgeInsets.all(16),
+        child: Row(
+          children: [
+            CircleAvatar(
+              backgroundColor: cor.withOpacity(0.1),
+              radius: 28,
+              child: Icon(icone, color: cor, size: 32),
+            ),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  isNearTime
+                      ? BlinkingText(
+                          text: titulo,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: cor,
+                          ),
+                        )
+                      : Text(
+                          titulo,
+                          style: TextStyle(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 18,
+                            color: cor,
+                          ),
+                        ),
+                  SizedBox(height: 4),
+                  Text(
+                    subtitulo,
+                    style: TextStyle(
+                      fontSize: 14,
+                      color: Theme.of(context).textTheme.bodySmall?.color,
+                    ),
+                  ),
+                ],
               ),
-        subtitle: Text(subtitulo, style: TextStyle(fontSize: 14)),
-        trailing: isNearTime ? Icon(Icons.warning, color: Colors.red) : null,
+            ),
+            if (isNearTime)
+              Icon(Icons.warning, color: Colors.redAccent, size: 28),
+          ],
+        ),
       ),
     );
   }
 
   bool _isNearTime(DateTime horario) {
     final agora = DateTime.now();
-    final diferenca = horario.difference(agora).inHours;
-    return diferenca >= 0 && diferenca <= 1; // Dentro de 1 hora
+    final diferenca = horario
+        .difference(agora)
+        .inMinutes; // Mudança para minutos para mais precisão
+    return diferenca >= 0 && diferenca <= 60; // Dentro de 1 hora
   }
 }
 
-// Widget para texto piscante
+// Widget para texto piscante (melhorado com duração mais suave)
 class BlinkingText extends StatefulWidget {
   final String text;
   final TextStyle? style;
@@ -293,9 +372,9 @@ class _BlinkingTextState extends State<BlinkingText>
     super.initState();
     _controller = AnimationController(
       vsync: this,
-      duration: Duration(milliseconds: 500),
+      duration: Duration(milliseconds: 800),
     );
-    _animation = Tween<double>(begin: 1.0, end: 0.0).animate(_controller);
+    _animation = Tween<double>(begin: 1.0, end: 0.3).animate(_controller);
     _controller.repeat(reverse: true);
   }
 
